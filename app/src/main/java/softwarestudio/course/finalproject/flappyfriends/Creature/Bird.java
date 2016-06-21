@@ -94,7 +94,13 @@ public class Bird {
     }
 
     public void setX(float x) { this.x = x; }
-    public void setY(float y) { this.y = y; }
+    public void setY(float y) {
+        float upperbound = GameActivity.getCameraHeight() - BIRD_HEIGHT / 2;
+        if (y > upperbound)
+            this.y = upperbound;
+        else
+            this.y = y;
+    }
     public void setAngle(float angle) {
         if (angle > MAX_ANGLE)
             this.angle = MAX_ANGLE;

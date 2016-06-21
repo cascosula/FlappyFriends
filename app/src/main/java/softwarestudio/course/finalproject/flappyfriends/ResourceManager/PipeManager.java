@@ -23,8 +23,6 @@ public class PipeManager {
 
     private final static String LOG_TAG = PipeManager.class.getSimpleName();
 
-    private final static int MAX_PIPEPAIRS = 4;
-
     // parameter used only as game host
     private int pipePairTail = 0;
 
@@ -66,6 +64,11 @@ public class PipeManager {
         public void setPipePairSpritePosition() {
             setPipePairX();
             setPipePairY();
+        }
+
+        public boolean isCollided(Sprite sprite) {
+            return upperSprite.collidesWith(sprite)
+                    || lowerSprite.collidesWith(sprite);
         }
 
         public boolean outofLeftScreenBound() {
@@ -197,7 +200,8 @@ public class PipeManager {
      * Commands are defined by res->value->gamestate.xml
      */
     public void receiveCommand() {
-        if (false) {
+        if (ReceiveDataStorage.getPlayerLabel() > Utility.TARGET_HOST
+                && ReceiveDataStorage.getConnection()) {
             // If as a multi-player game participant
             FetchPipePairData();
         } else {
@@ -206,8 +210,12 @@ public class PipeManager {
 
             // send back data to receiver storage
             // if at multi-player game
-            if (false) {
-
+            if (ReceiveDataStorage.getConnection()) {
+                int size = pairPipeSprites.size();
+                List<PipePair> data = new ArrayList<>();
+                for (int i=0; i<size; i++)
+                    data.add(pairPipeSprites.get(i).getPipePair());
+                ReceiveDataStorage.setPipePairsData(data);
             }
         }
     }
@@ -221,6 +229,16 @@ public class PipeManager {
         }
     }
 
+    public boolean isCollided(Sprite sprite) {
+        if (pairPipeSprites == null && pairPipeSprites.size() == 0)
+            return false;
+        boolean check = false;
+        int size = pairPipeSprites.size();
+        for (int i=0; i<size && !check; i++)
+            check |= pairPipeSprites.get(i).isCollided(sprite);
+        return check;
+    }
+
     /**
      * As a multi-player participant,
      * function fetches from {@link softwarestudio.course.finalproject.flappyfriends.Receiver.ReceiveDataStorage}
@@ -228,20 +246,18 @@ public class PipeManager {
      * function deals with data directly thus there is no need of usage
      */
     private void FetchPipePairData() {
-        if (false) {
-            // If as a multi-player game participant
-            List<PipePair> newdata = ReceiveDataStorage.getPipePairs();
-            int originsize = pairPipeSprites.size();
-            int newsize = newdata.size();
-            if (originsize == newsize) {
-                for (int i=0; i<originsize; i++) {
-                    pairPipeSprites.get(i).modifyPipePair(
-                            newdata.get(i)
-                    );
-                }
-            } else {
-                // deal with data size not fetched
+        // If as a multi-player game participant
+        List<PipePair> newdata = ReceiveDataStorage.getPipePairs();
+        int originsize = pairPipeSprites.size();
+        int newsize = newdata.size();
+        if (originsize == newsize) {
+            for (int i=0; i<originsize; i++) {
+                pairPipeSprites.get(i).modifyPipePair(
+                        newdata.get(i)
+                );
             }
+        } else {
+            // deal with data size not fetched
         }
     }
 

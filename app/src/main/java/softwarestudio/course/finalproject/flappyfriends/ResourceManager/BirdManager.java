@@ -173,7 +173,7 @@ public class BirdManager {
     }
 
     public void setReadyPosition() {
-        float start = GameActivity.getCameraWidth() / 2;
+        float start = GameActivity.getCameraWidth() / 2 - Bird.getBirdWith() / 2;
         int size = birdSprites.size();
         for (int i=0; i<size; i++) {
             BirdSprite cur = birdSprites.get(i);
@@ -183,6 +183,17 @@ public class BirdManager {
             cur.setSpeed(0);
             start -= Bird.getBirdWith() * 4 / 3;
         }
+    }
+
+    public boolean checkSelfBirdCollision(PipeManager pipeManager) {
+        if (pipeManager == null)
+            return false;
+
+        BirdSprite me = birdSprites.get(ReceiveDataStorage.getPlayerLabel());
+        boolean check = pipeManager.isCollided(me.getAnimatedSprite())
+                || me.outofLowerBound();
+        if (check) me.StopAnimation();
+        return check;
     }
 
     public void SendCommand() {
@@ -239,18 +250,5 @@ public class BirdManager {
         int size = birdSprites.size();
         for (int i=0; i<size; i++)
             birdSprites.get(i).move();
-    }
-
-    public void DetectBirdsOverBound() {
-        if (birdSprites == null || birdSprites.size() == 0)
-            ReceiveDataStorage.setGameActivation(false);
-        else {
-            int size = birdSprites.size();
-            boolean check = true;
-            for (int i=0; i<size && check; i++) {
-                check &= birdSprites.get(i).outofVerticalBound();
-            }
-            ReceiveDataStorage.setGameActivation(!check);
-        }
     }
 }

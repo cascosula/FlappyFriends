@@ -44,6 +44,7 @@ public class ReceiveDataStorage {
     private static int PLAYER_NUM = 1;
     private static boolean IS_CONNECTED = false;
     private static boolean GAME_ACTIVE = false;
+    private static int GAME_STATE = Utility.GAMESTATE_ONIDLE;
 
     private static List<PipePair> pipePairs = new ArrayList<>();
 
@@ -69,6 +70,12 @@ public class ReceiveDataStorage {
 
     public static void setConnection(boolean connection) {
         IS_CONNECTED = connection;
+    }
+
+    public static void setGameState(int gameState) {
+        if (gameState >= Utility.GAMESTATE_NULL)
+            return;
+        GAME_STATE = gameState;
     }
 
     /**
@@ -198,6 +205,8 @@ public class ReceiveDataStorage {
     public static boolean getConnection() { return IS_CONNECTED; }
 
     public static boolean getGameActivation() { return GAME_ACTIVE; }
+
+    public static int getGameState() { return GAME_STATE; }
 
     /**
      * Assessed by {@link softwarestudio.course.finalproject.flappyfriends.ResourceManager.BirdManager}

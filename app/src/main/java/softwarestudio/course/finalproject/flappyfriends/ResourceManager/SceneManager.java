@@ -25,9 +25,6 @@ public class SceneManager {
     private Text testCounterTitle = null;
     private Text testCounter = null;
 
-    private Bird[] birds;
-    private Pipe[] pipes;
-
     public SceneManager(
             SimpleBaseGameActivity context,
             FontManager fontManager,
@@ -40,11 +37,6 @@ public class SceneManager {
         mParallaxBackground = parallaxBackground;
     }
 
-    public void setCreatureList(Bird[] birds, Pipe[] pipes) {
-        this.birds = birds;
-        this.pipes = pipes;
-    }
-
     public Scene buildScene() {
 
         Scene scene = new Scene();
@@ -54,7 +46,7 @@ public class SceneManager {
                 new ParallaxBackground.ParallaxEntity(1, mImgaeManager.getBackGroundSprite()));
         scene.setBackground(mParallaxBackground);
         scene.setBackgroundEnabled(true);
-
+/*
         testCounterTitle = new Text(
                 0,
                 0,
@@ -81,19 +73,7 @@ public class SceneManager {
         );
         centerText(testCounter);
         testCounter.setZIndex(3);
-        scene.attachChild(testCounter);
-
-        if (birds != null && birds.length > 0) {
-            for (int i=0; i<birds.length; i++) {
-                // add bird into scene
-            };
-        }
-
-        if (pipes != null && pipes.length > 0) {
-            for (int i=0; i<pipes.length; i++) {
-                // add pipe into scene
-            }
-        }
+        scene.attachChild(testCounter);*/
 
         return scene;
     }

@@ -14,7 +14,7 @@ public class PipePair {
 
     private float alignX;
     private float spawnPoint;
-    public final static float ENTRANCE_HEIGHT = 120;
+    public final static float ENTRANCE_HEIGHT = Bird.getBirdHeight() * 4;
 
     public PipePair(Pipe upperPipe, Pipe lowerPipe)
         throws IllegalArgumentException{

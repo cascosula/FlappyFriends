@@ -3,6 +3,8 @@ package softwarestudio.course.finalproject.flappyfriends;
 import android.support.v7.widget.LinearLayoutCompat;
 
 import org.andengine.engine.camera.Camera;
+import org.andengine.engine.handler.timer.ITimerCallback;
+import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
@@ -20,12 +22,14 @@ import softwarestudio.course.finalproject.flappyfriends.Creature.Bird;
 import softwarestudio.course.finalproject.flappyfriends.Creature.Pipe;
 import softwarestudio.course.finalproject.flappyfriends.Creature.PipePair;
 import softwarestudio.course.finalproject.flappyfriends.Receiver.ReceiveDataStorage;
+import softwarestudio.course.finalproject.flappyfriends.ResourceManager.AudioManager;
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.BirdManager;
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.FontManager;
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.ImageManager;
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.PipeManager;
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.SceneManager;
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.SoundManager;
+import softwarestudio.course.finalproject.flappyfriends.ResourceManager.TextManager;
 
 /**
  * Created by lusa on 2016/06/18.
@@ -38,7 +42,9 @@ public class GameActivity extends SimpleBaseGameActivity {
     private Camera mCamera = null;
 
     private SoundManager mSoundManager = null;
+    private AudioManager mAudioManager = null;
     private FontManager mFontManager = null;
+    private TextManager mTextManager = null;
     private ImageManager mImageManager = null;
     private PipeManager mPipeManager = null;
     private BirdManager mBirdManager = null;
@@ -47,11 +53,9 @@ public class GameActivity extends SimpleBaseGameActivity {
     private Scene mScene = null;
     private Background mBackGround = null;
 
-    private Bird[] birds;
-    private Pipe[] pipes;
+    private TimerHandler mTimerHandler = null;
 
     private static final float SCROLL_SPEED = 4.5f;	// game speed
-    private int gamestate = R.integer.GAME_IDLE;
 
     private float mCurrentWorldPosition = 0;
 
@@ -62,8 +66,10 @@ public class GameActivity extends SimpleBaseGameActivity {
         CAMERA_HEIGHT = 800;
         CAMERA_WIDTH = Utility.calculateScreenWidth(this, CAMERA_HEIGHT);
 
-        mSoundManager = new SoundManager(this);
+        //mSoundManager = new SoundManager(this);
+        mAudioManager = new AudioManager(this);
         mFontManager = new FontManager(this);
+        mTextManager = new TextManager(this, mFontManager.getFont());
         mImageManager = new ImageManager(this);
         mPipeManager = new PipeManager(this, mImageManager, Utility.MAX_PIPEPAIRS);
         mBirdManager = new BirdManager(
@@ -83,8 +89,8 @@ public class GameActivity extends SimpleBaseGameActivity {
 
             @Override
             public void onUpdate(float pSecondsElapsed) {
-                switch(gamestate){
-                    case R.integer.GAME_OPRATE:
+                switch(ReceiveDataStorage.getGameState()){
+                    case Utility.GAMESTATE_ONOPERATE:
                         final float cameraCurrentX = mCurrentWorldPosition;//mCamera.getCenterX();
 
                         if (prevX != cameraCurrentX) {
@@ -108,36 +114,32 @@ public class GameActivity extends SimpleBaseGameActivity {
                 (ParallaxBackground) mBackGround
         );
         mScene = mSceneManager.buildScene();
+        mTextManager.AttachToScene(mScene);
         mPipeManager.AttachToScene(mScene);
         mBirdManager.AttachToScene(mScene);
-        /*
-        Pipe upper = new Pipe(82, 0, GameActivity.getCameraWidth()/2, GameActivity.getCameraHeight());
-        Pipe lower = new Pipe(82, 0, GameActivity.getCameraWidth()/2, 0);
-        PipePair pipePair = new PipePair(upper, lower);
-        pipePair.randomPipePairHeight();
-        Sprite[] temp = mImageManager.buildPipePairSprites(this, pipePair);
-        temp[0].setX(upper.getX());
-        temp[0].setY(upper.getY());
-        temp[1].setX(lower.getX());
-        temp[1].setY(lower.getY());
-        mScene.attachChild(temp[0]);
-        mScene.attachChild(temp[1]);
-        */
         mScene.setOnSceneTouchListener(new IOnSceneTouchListener() {
             @Override
             public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
                 if (pSceneTouchEvent.isActionDown()) {
-                    switch (gamestate) {
-                        case R.integer.GAME_PREPARE:
-                            // if only one player(non-multi-player mode)
-                            // game starts as screen touched
-                            // else starts after 3s
-                            //if (birds != null && birds.length == 1)
+                    switch (ReceiveDataStorage.getGameState()) {
+                        case Utility.GAMESTATE_ONPREPARE:
+                            if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST)
                                 ReceiveDataStorage.setGameActivation(true);
                             break;
-                        case R.integer.GAME_OPRATE:
-                            mBirdManager.SendCommand();
+                        case Utility.GAMESTATE_ONOPERATE:
+                            if (ReceiveDataStorage.getGameActivation()) {
+                                mBirdManager.SendCommand();
+                                mAudioManager.playAudio(
+                                        AudioManager.AUDIOLABEL_JUMP
+                                );
+                            }
                             curScore++;
+                            break;
+                        case Utility.GAMESTATE_ONSTOP:
+                            /*
+                            if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST)
+                                ReceiveDataStorage.setGameState(Utility.GAMESTATE_ONIDLE);
+                            */
                             break;
                         default: break;
                     }
@@ -156,21 +158,22 @@ public class GameActivity extends SimpleBaseGameActivity {
 
             @Override
             public void onUpdate(float pSecondsElapsed) {
-                switch (gamestate) {
-                    case R.integer.GAME_IDLE:
+                switch (ReceiveDataStorage.getGameState()) {
+                    case Utility.GAMESTATE_ONIDLE:
                         onIdle();
                         break;
-                    case R.integer.GAME_PREPARE:
+                    case Utility.GAMESTATE_ONPREPARE:
                         onPrepare();
                         break;
-                    case R.integer.GAME_OPRATE:
+                    case Utility.GAMESTATE_ONOPERATE:
                         onOperate();
                         break;
-                    case R.integer.GAME_STOP:
+                    case Utility.GAMESTATE_ONSTOP:
                         onStop();
                         break;
                     default:
-                        gamestate = R.integer.GAME_IDLE;
+                        ReceiveDataStorage
+                                .setGameState(Utility.GAMESTATE_ONIDLE);
                         break;
                 }
                 super.onUpdate(pSecondsElapsed);
@@ -179,32 +182,68 @@ public class GameActivity extends SimpleBaseGameActivity {
 
             private void onIdle() {
                 curScore = 0;
-                gamestate = R.integer.GAME_PREPARE;
+                if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST)
+                    ReceiveDataStorage.setGameState(Utility.GAMESTATE_ONPREPARE);
             }
 
             private void onPrepare() {
-                mSoundManager.startAudio(R.raw.backgroundmusic);
+                mTextManager.showBestScoreOnly();
                 mPipeManager.setReadyPosition();
                 mBirdManager.setReadyPosition();
                 // if only one player(non-multi-player mode)
                 // game starts as screen touched
                 // else starts after 3s
-                if (ReceiveDataStorage.getGameActivation())
-                    gamestate = R.integer.GAME_OPRATE;
+                if (ReceiveDataStorage.getGameActivation()
+                        && ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
+                    ReceiveDataStorage
+                            .setGameState(Utility.GAMESTATE_ONOPERATE);
+                }
             }
+
             private void onOperate() {
-                mSceneManager.setScoreBoard(curScore);
+                mAudioManager.playAudio(AudioManager.AUDIOLABEL_BGM);
+                mTextManager.setScoreText(curScore);
+                mTextManager.setCurrentScoreBoard();
+                mTextManager.setScoreText(curScore);
                 mCurrentWorldPosition -= SCROLL_SPEED;
                 mPipeManager.receiveCommand();
                 mBirdManager.FetchCommand();
-                mBirdManager.DetectBirdsOverBound();
-                if (!ReceiveDataStorage.getGameActivation())
-                    gamestate = R.integer.GAME_STOP;
+                if (mBirdManager.checkSelfBirdCollision(mPipeManager)) {
+                    ReceiveDataStorage.setGameActivation(false);
+                    mAudioManager.playAudio(AudioManager.AUDIOLABEL_GAMEOVER);
+                }
+                if (!ReceiveDataStorage.getGameActivation()
+                        && ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
+                    ReceiveDataStorage.setGameState(Utility.GAMESTATE_ONSTOP);
+                    mTextManager.setScoreBoardReady(curScore);
+                    mPipeManager.setReadyPosition();
+                }
             }
+
             private void onStop() {
-                mSoundManager.startAudio(R.raw.gameover);
-                mSoundManager.stopAudio(R.raw.backgroundmusic);
-                gamestate = R.integer.GAME_IDLE;
+                mAudioManager.pauseAudio(AudioManager.AUDIOLABEL_BGM);
+                mBirdManager.FetchCommand();
+                if (ReceiveDataStorage.getConnection()) {
+
+                } else {
+                    if (!mTextManager.isAboveHalfScreen()) {
+                        mTimerHandler = new TimerHandler(
+                                1.6f,
+                                false,
+                                new ITimerCallback() {
+                                    @Override
+                                    public void onTimePassed(TimerHandler pTimerHandler) {
+                                        //mTextManager.setScoreBoard(curScore);
+                                        ReceiveDataStorage.setGameState(Utility.GAMESTATE_ONIDLE);
+                                        mScene.unregisterUpdateHandler(mTimerHandler);
+                                    }
+                                }
+                        );
+                        mScene.registerUpdateHandler(mTimerHandler);
+                    } else {
+                        mTextManager.moveScoreBoard();
+                    }
+                }
             }
         };
 
@@ -215,19 +254,21 @@ public class GameActivity extends SimpleBaseGameActivity {
                 mCamera
         );
 
+        engineOptions.getAudioOptions().setNeedsSound(true);
+        engineOptions.getAudioOptions().setNeedsMusic(true);
+
         return engineOptions;
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mSoundManager.stopAudio(R.raw.backgroundmusic);
+        mAudioManager.pauseAudio(AudioManager.AUDIOLABEL_BGM);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mSoundManager.releaseAllAudio();
     }
 
     public static float getCameraHeight() {

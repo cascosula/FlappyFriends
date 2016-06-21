@@ -20,7 +20,8 @@ public class FontManager {
     private final static String FONT_FILE_NAME = "DefaultWordFont.ttf";
     private static Font mFont = null;
 
-    public FontManager (SimpleBaseGameActivity context) {
+    public FontManager (SimpleBaseGameActivity context)
+        throws NullPointerException{
         if (context != null) {
             //FontFactory.setAssetBasePath(FONT_BUILD_PATH);
             Typeface typeface = Typeface.createFromAsset(context.getAssets(), FONT_FILE_NAME);
@@ -42,7 +43,7 @@ public class FontManager {
             );
             mFont.load();
         } else
-            throw new IllegalArgumentException("Empty SimpleBaseGameActivity");
+            throw new NullPointerException("Empty context");
     }
 
     public Font getFont() {

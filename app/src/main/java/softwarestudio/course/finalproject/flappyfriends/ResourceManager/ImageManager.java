@@ -141,7 +141,7 @@ public class ImageManager {
                         context.getVertexBufferObjectManager()
                 );
         //animatedSprite.animate(25);
-        animatedSprite.setZIndex(2);
+        animatedSprite.setZIndex(3);
 
         return animatedSprite;
     }
@@ -149,10 +149,10 @@ public class ImageManager {
     public Sprite[] buildPipePairSprites(SimpleBaseGameActivity context) {
 
         Sprite lowerPipeSprite = buildLowerPipeSprite(context);
-        lowerPipeSprite.setZIndex(1);
+        lowerPipeSprite.setZIndex(2);
 
         Sprite upperPipeSprite = buildUpperPipeSprite(context);
-        upperPipeSprite.setZIndex(1);
+        upperPipeSprite.setZIndex(2);
 
         return new Sprite [] {
                 upperPipeSprite,
@@ -178,7 +178,7 @@ public class ImageManager {
                 ),
                 context.getVertexBufferObjectManager()
         );
-        pipeSprite.setZIndex(1);
+        pipeSprite.setZIndex(2);
         return pipeSprite;
     }
 
@@ -200,7 +200,7 @@ public class ImageManager {
                 ),
                 context.getVertexBufferObjectManager()
         );
-        pipeSprite.setZIndex(1);
+        pipeSprite.setZIndex(2);
         return pipeSprite;
     }
 
