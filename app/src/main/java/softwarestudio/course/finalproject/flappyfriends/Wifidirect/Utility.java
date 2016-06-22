@@ -10,6 +10,7 @@ public class Utility{
     public static final int file_type = 0;
     public static final int local_ip_type = 1;
     public static final int forward_ip_addr = 2;
+    public static final int jump_command = 3;
 
     public static final int port_num = 8999;
     /**

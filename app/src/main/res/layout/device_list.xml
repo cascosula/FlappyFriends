@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:layout_marginRight="2dp"
-            android:src="@drawable/machine" />
+            android:src="@drawable/bird" />
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dp"
@@ -77,4 +77,12 @@
         android:layout_gravity="center"
         android:layout_height="match_parent"
         android:text="@string/empty_message" />
+
+    <Button
+        android:id="@+id/btn_start_game"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/get_start"
+        android:visibility="gone" />
+
 </LinearLayout>

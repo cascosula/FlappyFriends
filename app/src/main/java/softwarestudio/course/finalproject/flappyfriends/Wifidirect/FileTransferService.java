@@ -31,6 +31,7 @@ public class FileTransferService extends IntentService {
     private static final int SOCKET_TIMEOUT = 5000;
     public static final String ACTION_SEND_FILE = "com.example.android.wifidirect.SEND_FILE";
     public static final String ACTION_SEND_IP = "com.example.android.wifidirect.SEND_IP";
+    public static final String ACTION_SEND_JUMP = "com.example.android.wifidirect.SEND_JUMP";
     public static final String ACTION_SEND_FDIP_ADDR = "com.example.android.wifidirect.SEND_FDIP_ADDR";
     public static final String EXTRAS_FILE_PATH = "file_url";
     public static final String EXTRAS_IP_INFO = "ip_addr";
@@ -155,6 +156,38 @@ public class FileTransferService extends IntentService {
                 } catch (IOException e) {
                     Log.d(WiFiDirectActivity.TAG, e.toString());
                 }
+                Log.d(WiFiDirectActivity.TAG, "IP Client: Data written");
+            } catch (IOException e) {
+                Log.e(WiFiDirectActivity.TAG, e.getMessage());
+            } finally {
+                if (socket != null) {
+                    if (socket.isConnected()) {
+                        try {
+                            socket.close();
+                            Log.d(WiFiDirectActivity.TAG, "IP Client: closed");
+                        } catch (IOException e) {
+                            // Give up
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+
+        }else if (intent.getAction().equals(ACTION_SEND_JUMP))  {
+            String host = intent.getExtras().getString(EXTRAS_DST_ADDRESS);
+            Log.d(WiFiDirectActivity.TAG, "host = "+host);
+            Socket socket = new Socket();
+            try {
+                Log.d(WiFiDirectActivity.TAG, "IP Opening client socket - ");
+                socket.bind(null);
+                socket.connect((new InetSocketAddress(host, port)), SOCKET_TIMEOUT);
+
+                Log.d(WiFiDirectActivity.TAG, "IP Client socket - " + socket.isConnected());
+
+                OutputStream stream = socket.getOutputStream();
+                DataOutputStream dStream = new DataOutputStream(stream);
+                dStream.writeInt(Utility.jump_command);
+
                 Log.d(WiFiDirectActivity.TAG, "IP Client: Data written");
             } catch (IOException e) {
                 Log.e(WiFiDirectActivity.TAG, e.getMessage());

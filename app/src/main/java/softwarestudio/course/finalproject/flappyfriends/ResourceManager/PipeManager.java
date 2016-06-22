@@ -12,12 +12,13 @@ import java.util.List;
 import softwarestudio.course.finalproject.flappyfriends.Creature.Pipe;
 import softwarestudio.course.finalproject.flappyfriends.Creature.PipePair;
 import softwarestudio.course.finalproject.flappyfriends.GameActivity;
-import softwarestudio.course.finalproject.flappyfriends.R;
 import softwarestudio.course.finalproject.flappyfriends.Receiver.ReceiveDataStorage;
 import softwarestudio.course.finalproject.flappyfriends.Utility;
 
 /**
- * Created by lusa on 2016/06/19.
+ * Created by lusa on 2016/06/21.
+ * Data exchange interface between game activity and static storage of receiver
+ * Manage and Synchronize data of sprite from raw data
  */
 public class PipeManager {
 
@@ -38,6 +39,8 @@ public class PipeManager {
 
         private Sprite upperSprite;
         private Sprite lowerSprite;
+
+        private boolean passCount = false;
 
         public PipePairSprite(
                 PipePair pipePair,
@@ -71,6 +74,17 @@ public class PipeManager {
                     || lowerSprite.collidesWith(sprite);
         }
 
+        public boolean isPassed(Sprite sprite) {
+            if (!passCount) {
+                if (sprite.getX() > getAlignX()) {
+                    passCount = true;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public boolean outofLeftScreenBound() {
             if (pipePair.getUpperPipe().getX() <= -1*Pipe.getPipeWidth()-10)
                 return true;
@@ -99,6 +113,7 @@ public class PipeManager {
         }
 
         public void movetoReadyPosition() {
+            passCount = false;
             setPipePairAlignX(
                     GameActivity.getCameraWidth() + Pipe.getPipeWidth());
         }
@@ -134,14 +149,12 @@ public class PipeManager {
 
     private List<PipePairSprite> pairPipeSprites;
 
-    private SimpleBaseGameActivity context;
-    private ImageManager imageManager;
-    private Scene scene;
-
     /**
      * Build unset pipe pair initially
-     * @param context
-     * @param imageManager
+     * @param context {game activity}
+     * @param imageManager {image manager}
+     * @param pipenum {number of pipe pair}
+     * @throws IllegalArgumentException
      */
     public PipeManager(
             SimpleBaseGameActivity context,
@@ -175,18 +188,17 @@ public class PipeManager {
 
     /**
      * Attach all pair pipes to scene
-     * @param scene
+     * @param scene {scene}
      */
     public void AttachToScene(Scene scene) {
         if (scene == null) return;
 
-        this.scene = scene;
         if (pairPipeSprites != null) {
             int size = pairPipeSprites.size();
             for (int i=0; i<size; i++) {
                 PipePairSprite cur = pairPipeSprites.get(i);
-                this.scene.attachChild(cur.getUpperSprite());
-                this.scene.attachChild(cur.getLowerSprite());
+                scene.attachChild(cur.getUpperSprite());
+                scene.attachChild(cur.getLowerSprite());
             }
         }
     }
@@ -203,39 +215,56 @@ public class PipeManager {
         if (ReceiveDataStorage.getPlayerLabel() > Utility.TARGET_HOST
                 && ReceiveDataStorage.getConnection()) {
             // If as a multi-player game participant
-            FetchPipePairData();
-        } else {
+            if (ReceiveDataStorage.getConnection())
+                FetchPipePairData();
+        } else if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
             // If as a game host
             movePipePairSprites();
 
             // send back data to receiver storage
             // if at multi-player game
-            if (ReceiveDataStorage.getConnection()) {
-                int size = pairPipeSprites.size();
-                List<PipePair> data = new ArrayList<>();
-                for (int i=0; i<size; i++)
-                    data.add(pairPipeSprites.get(i).getPipePair());
-                ReceiveDataStorage.setPipePairsData(data);
-            }
+            if (ReceiveDataStorage.getConnection())
+                FeedBackPipePairData();
         }
     }
 
     public void setReadyPosition() {
-        if (pairPipeSprites == null || pairPipeSprites.size() == 0)
-            return;
-        int size = pairPipeSprites.size();
-        for (int i=0; i<size; i++) {
-            pairPipeSprites.get(i).moveoutofRightBound();
+        if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
+            if (pairPipeSprites == null || pairPipeSprites.size() == 0)
+                return;
+            int size = pairPipeSprites.size();
+            for (int i=0; i<size; i++) {
+                pairPipeSprites.get(i).moveoutofRightBound();
+            }
+            if (ReceiveDataStorage.getConnection())
+                FeedBackPipePairData();
+        } else {
+            if (ReceiveDataStorage.getConnection())
+                FetchPipePairData();
         }
     }
 
     public boolean isCollided(Sprite sprite) {
-        if (pairPipeSprites == null && pairPipeSprites.size() == 0)
-            return false;
+        if (sprite == null) return false;
+        if (pairPipeSprites == null) return false;
+        if (pairPipeSprites.size() == 0) return false;
+
         boolean check = false;
         int size = pairPipeSprites.size();
         for (int i=0; i<size && !check; i++)
             check |= pairPipeSprites.get(i).isCollided(sprite);
+        return check;
+    }
+
+    public boolean isPassed(Sprite sprite) {
+        if (sprite == null) return false;
+        if (pairPipeSprites == null) return false;
+        if (pairPipeSprites.size() == 0) return false;
+
+        boolean check = false;
+        int size = pairPipeSprites.size();
+        for (int i=0; i<size && !check; i++)
+            check |= pairPipeSprites.get(i).isPassed(sprite);
         return check;
     }
 
@@ -250,15 +279,23 @@ public class PipeManager {
         List<PipePair> newdata = ReceiveDataStorage.getPipePairs();
         int originsize = pairPipeSprites.size();
         int newsize = newdata.size();
-        if (originsize == newsize) {
-            for (int i=0; i<originsize; i++) {
-                pairPipeSprites.get(i).modifyPipePair(
-                        newdata.get(i)
-                );
-            }
-        } else {
-            // deal with data size not fetched
+        int size = Math.min(originsize, newsize);
+        for (int i=0; i<size; i++) {
+            pairPipeSprites.get(i).modifyPipePair(
+                    newdata.get(i)
+            );
         }
+    }
+
+    private void FeedBackPipePairData() {
+        if (pairPipeSprites == null)
+            return;
+        List<PipePair> data = new ArrayList<>();
+        int size = pairPipeSprites.size();
+        for (int i=0; i<size; i++) {
+            data.add(pairPipeSprites.get(i).getPipePair());
+        }
+        ReceiveDataStorage.setPipePairsData(data);
     }
 
     /**

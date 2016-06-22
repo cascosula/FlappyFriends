@@ -20,6 +20,7 @@ import android.app.ListFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
@@ -33,10 +34,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 
+import softwarestudio.course.finalproject.flappyfriends.GameActivity;
 import softwarestudio.course.finalproject.flappyfriends.R;
+import softwarestudio.course.finalproject.flappyfriends.Receiver.ReceiveDataStorage;
 
 /**
  * A ListFragment that displays available peers on discovery and requests the

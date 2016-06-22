@@ -1,5 +1,7 @@
 package softwarestudio.course.finalproject.flappyfriends.Receiver;
 
+import android.content.Context;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -15,10 +17,10 @@ import softwarestudio.course.finalproject.flappyfriends.Utility;
  * Created by lusa on 2016/06/20.
  * :: Data path ::
  * As a game host(if at multi-player game)--
- *            addCommandToCommandQueue(...)             getCommandFromCommandQueue()
- * BirdManger==============================>DataStorage=============================>Receiver
- *          setCommandsData(...)             getCommandListCopyAndClearOrigin()
- * Receiver=====================>DataStorage===================================>BirdManager
+ *            addCommandToCommandQueue(...)             FetchCommandQueueToCommandList()
+ * BirdManger==============================>DataStorage=================================>DataStorage
+ *          addCommandToCommandList(...)             getCommandListCopyAndClearOrigin()
+ * Receiver=============================>DataStorage===================================>BirdManager
  *             setBirdsData(...)             getBirds()
  * BirdManager==================>DataStorage===========>Receiver
  *             setPipePairsData(...)             getPipePairs()
@@ -33,25 +35,29 @@ import softwarestudio.course.finalproject.flappyfriends.Utility;
  * Receiver======================>DataStorage===============>PipeManager
  *
  * :: Caution ::
- * Command List is assessed only by gama host
+ * Command List is assessed only by "GAME HOST"
  * Command Queue can be assessed "EITHER"
  * Set the static parameter "PLAYER_LABER" for recognition as a host or participant
  * (0:host >0:participant defined in Utility)
+ * Set the static parameter "IS_CONNECTED" for recognition of wifi connection
+ * (true:connected false:disconnected)
  */
 public class ReceiveDataStorage {
 
-    private static int PLAYER_LABEL = 0;
-    private static int PLAYER_NUM = 1;
-    private static boolean IS_CONNECTED = false;
-    private static boolean GAME_ACTIVE = false;
-    private static int GAME_STATE = Utility.GAMESTATE_ONIDLE;
+    public static int PLAYER_LABEL = 0;
+    public static int PLAYER_NUM = 1;
+    public static boolean IS_CONNECTED = false;
+    public static boolean GAME_ACTIVE = false;
+    public static int GAME_STATE = Utility.GAMESTATE_ONIDLE;
 
-    private static List<PipePair> pipePairs = new ArrayList<>();
+    public static int MYSCORE = 0;
 
-    private static List<Bird> birds = new ArrayList<>();
+    public static List<PipePair> pipePairs = new ArrayList<>();
 
-    private static List<Command> commands = new ArrayList<>();
-    private static Queue<Command> commandQueue = new ArrayDeque<>();
+    public static List<Bird> birds = new ArrayList<>();
+
+    public static List<Command> commands = new ArrayList<>();
+    public static Queue<Command> commandQueue = new ArrayDeque<>();
 
     public static void setPlayerLabel(int label) {
         if (label < Utility.TARGET_NULL)
@@ -78,8 +84,21 @@ public class ReceiveDataStorage {
         GAME_STATE = gameState;
     }
 
+    public static void MyscoreIncremnet() {
+        if (MYSCORE <= Utility.MAX_SCORE)
+            MYSCORE++;
+    }
+
+    public static void setMyscoreZero() {
+        MYSCORE = 0;
+    }
+
+    public static void UpdateMyscoreToSharedPerf(Context context) {
+        Utility.SetBestScore(context, MYSCORE);
+    }
+
     /**
-     * Input new bird list
+     * * Input new bird list
      * If the size of new data does not fetch to original list
      * data in original list clears and takes in elements in new data
      * As a game host,
@@ -154,6 +173,11 @@ public class ReceiveDataStorage {
         commandQueue.add(command);
     }
 
+    public static void addCommandToCommandList(Command command) {
+        if (command == null) return;
+        commands.add(command);
+    }
+
     /**
      * Input new command list
      * If the size of new data does not fetch to original list
@@ -162,6 +186,7 @@ public class ReceiveDataStorage {
      * Called only by game host in Reciever
      * @param newdata
      */
+    /*
     public static void setCommandsData(List<Command> newdata) {
         if (newdata == null) return;
         int originsize = commands.size();
@@ -184,6 +209,7 @@ public class ReceiveDataStorage {
             }
         }
     }
+    */
 
     /**
      * Write command in queue back to list
@@ -207,6 +233,8 @@ public class ReceiveDataStorage {
     public static boolean getGameActivation() { return GAME_ACTIVE; }
 
     public static int getGameState() { return GAME_STATE; }
+
+    public static int getMyscore() { return MYSCORE; }
 
     /**
      * Assessed by {@link softwarestudio.course.finalproject.flappyfriends.ResourceManager.BirdManager}

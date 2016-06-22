@@ -30,6 +30,7 @@ import softwarestudio.course.finalproject.flappyfriends.ResourceManager.PipeMana
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.SceneManager;
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.SoundManager;
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.TextManager;
+import softwarestudio.course.finalproject.flappyfriends.Wifidirect.DeviceDetailFragment;
 
 /**
  * Created by lusa on 2016/06/18.
@@ -58,8 +59,6 @@ public class GameActivity extends SimpleBaseGameActivity {
     private static final float SCROLL_SPEED = 4.5f;	// game speed
 
     private float mCurrentWorldPosition = 0;
-
-    private int curScore = 0;
 
     @Override
     protected void onCreateResources() throws IOException {
@@ -114,28 +113,38 @@ public class GameActivity extends SimpleBaseGameActivity {
                 (ParallaxBackground) mBackGround
         );
         mScene = mSceneManager.buildScene();
-        mTextManager.AttachToScene(mScene);
         mPipeManager.AttachToScene(mScene);
         mBirdManager.AttachToScene(mScene);
+        mTextManager.AttachToScene(mScene);
         mScene.setOnSceneTouchListener(new IOnSceneTouchListener() {
             @Override
             public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
                 if (pSceneTouchEvent.isActionDown()) {
                     switch (ReceiveDataStorage.getGameState()) {
                         case Utility.GAMESTATE_ONIDLE:
-                            if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
+                            if (true || ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
                                 ReceiveDataStorage.setGameActivation(true);
                                 ReceiveDataStorage.setGameState(Utility.GAMESTATE_ONPREPARE);
                             }
                             break;
                         case Utility.GAMESTATE_ONOPERATE:
+                            /*
                             if (ReceiveDataStorage.getGameActivation()) {
                                 mBirdManager.SendCommand();
                                 mAudioManager.playAudio(
                                         AudioManager.AUDIOLABEL_JUMP
                                 );
                             }
-                            curScore++;
+                            */
+                            mBirdManager.SendCommand();
+                            DeviceDetailFragment fragment = (DeviceDetailFragment) getFragmentManager().findFragmentById(R.id.frag_detail);
+                            try {
+                                fragment.sendJump();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            mAudioManager.playAudio(
+                                    AudioManager.AUDIOLABEL_JUMP);
                             break;
                         case Utility.GAMESTATE_ONSTOP:
                             /*
@@ -183,51 +192,60 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 
             private void onIdle() {
-                curScore = 0;
+                ReceiveDataStorage.setMyscoreZero();
+                mTextManager.showBestScoreBoard();
+                mPipeManager.setReadyPosition();
                 mBirdManager.setAtVerticalMiddle();
-                mTextManager.showBestScoreOnly();
             }
 
             private void onPrepare() {
-                mPipeManager.setReadyPosition();
                 mBirdManager.setReadyPosition();
                 // if only one player(non-multi-player mode)
                 // game starts as screen touched
                 // else starts after 3s
-                if (ReceiveDataStorage.getGameActivation()
-                        && ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
-                    ReceiveDataStorage
-                            .setGameState(Utility.GAMESTATE_ONOPERATE);
+                if (true || ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
+                    ReceiveDataStorage.setGameState(Utility.GAMESTATE_ONOPERATE);
                 }
             }
 
             private void onOperate() {
                 mAudioManager.playAudio(AudioManager.AUDIOLABEL_BGM);
-                mTextManager.setScoreText(curScore);
-                mTextManager.setCurrentScoreBoard();
-                mTextManager.setScoreText(curScore);
+
+                mTextManager.showCountingScoreBoard();
+
                 mCurrentWorldPosition -= SCROLL_SPEED;
+
                 mPipeManager.receiveCommand();
+
                 mBirdManager.FetchCommand();
+
+                if (mBirdManager.checkSelfBirdPassPipePair(mPipeManager)) {
+                    ReceiveDataStorage.MyscoreIncremnet();
+                    mAudioManager.playAudio(AudioManager.AUDIOLABEL_SCOREUP);
+                }
                 if (mBirdManager.checkSelfBirdCollision(mPipeManager)) {
                     ReceiveDataStorage.setGameActivation(false);
                     mAudioManager.playAudio(AudioManager.AUDIOLABEL_GAMEOVER);
                 }
-                if (!ReceiveDataStorage.getGameActivation()
-                        && ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
+                /*if (!ReceiveDataStorage.getGameActivation()
+                        && ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {*/
+                if(!ReceiveDataStorage.getGameActivation()){
                     ReceiveDataStorage.setGameState(Utility.GAMESTATE_ONSTOP);
-                    mTextManager.setScoreBoardReady(curScore);
-                    mPipeManager.setReadyPosition();
+                    mTextManager.setFullScoreBoardReady();
+                    //mPipeManager.setReadyPosition();
                 }
             }
 
             private void onStop() {
                 mAudioManager.pauseAudio(AudioManager.AUDIOLABEL_BGM);
+
+                // let the bird falls down to the floor
                 mBirdManager.FetchCommand();
+
                 if (ReceiveDataStorage.getConnection()) {
 
                 } else {
-                    if (!mTextManager.isAboveHalfScreen()) {
+                    if (!mTextManager.isAboveHorizontalMiddle()) {
                         mTimerHandler = new TimerHandler(
                                 1.6f,
                                 false,
@@ -242,7 +260,7 @@ public class GameActivity extends SimpleBaseGameActivity {
                         );
                         mScene.registerUpdateHandler(mTimerHandler);
                     } else {
-                        mTextManager.moveScoreBoard();
+                        mTextManager.FullScoreBoardDescendAnimation();
                     }
                 }
             }

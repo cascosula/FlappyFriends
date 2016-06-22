@@ -29,6 +29,7 @@ import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,7 +48,7 @@ import softwarestudio.course.finalproject.flappyfriends.Wifidirect.DeviceListFra
  * The application should also register a BroadcastReceiver for notification of
  * WiFi state related events.
  */
-public class WiFiDirectActivity extends Activity implements ChannelListener, DeviceActionListener {
+public class WiFiDirectActivity extends AppCompatActivity implements ChannelListener, DeviceActionListener {
 
     public static final String TAG = "wifidirectdemo";
     private WifiP2pManager manager;
@@ -69,7 +70,7 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
+        Log.d("a", "onCreate Wifi");
         // add necessary intent values to be matched.
 
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
@@ -173,8 +174,8 @@ public class WiFiDirectActivity extends Activity implements ChannelListener, Dev
     public void showDetails(WifiP2pDevice device) {
         DeviceDetailFragment fragment = (DeviceDetailFragment) getFragmentManager()
                 .findFragmentById(R.id.frag_detail);
-        fragment.showDetails(device);
-
+        //fragment.showDetails(device);
+        fragment.pressToConnect(device);
     }
 
     @Override

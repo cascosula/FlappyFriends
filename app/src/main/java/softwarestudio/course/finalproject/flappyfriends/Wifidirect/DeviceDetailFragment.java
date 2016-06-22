@@ -39,6 +39,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import softwarestudio.course.finalproject.flappyfriends.Creature.Bird;
+import softwarestudio.course.finalproject.flappyfriends.Creature.Command;
+import softwarestudio.course.finalproject.flappyfriends.Creature.PipePair;
+import softwarestudio.course.finalproject.flappyfriends.GameActivity;
+import softwarestudio.course.finalproject.flappyfriends.Receiver.ReceiveDataStorage;
 import softwarestudio.course.finalproject.flappyfriends.Wifidirect.DeviceListFragment.DeviceActionListener;
 
 import java.io.BufferedReader;
@@ -55,6 +60,10 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
 
 import javax.xml.transform.Result;
 
@@ -145,15 +154,21 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
                     @Override
                     public void onClick(View v) {
+                        ReceiveDataStorage.PLAYER_LABEL = (info.isGroupOwner)? 0:1;
+                        ReceiveDataStorage.PLAYER_NUM = ipsNum;
+                        ReceiveDataStorage.IS_CONNECTED = true;
+                        ReceiveDataStorage.GAME_ACTIVE = false;
+                        ReceiveDataStorage.GAME_STATE = softwarestudio.course.finalproject.flappyfriends.Utility.GAMESTATE_ONIDLE;
 
-                        /*pop*/
-                        //String[] items = groupIps;
-                        String[] items = new String[ipsNum];
-                        Log.d(WiFiDirectActivity.TAG, "ipsNum = "+ipsNum);
-                        for (int i = 0; i < ipsNum; i++) items[i] = groupIps[i];
-                        ShowAdapterAlert(items);
+                        ReceiveDataStorage.pipePairs = new ArrayList<>();
 
-                        Log.d(WiFiDirectActivity.TAG, "fileDstIp = " + fileDstIp);
+                        ReceiveDataStorage.birds = new ArrayList<>();
+
+                        ReceiveDataStorage.commands = new ArrayList<>();
+                        ReceiveDataStorage.commandQueue = new ArrayDeque<>();
+
+                        Intent intent = new Intent(getActivity(), GameActivity.class);
+                        startActivity(intent);
 
 
                     }
@@ -185,13 +200,27 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                 }
                 // Allow user to pick an image from Gallery or other
                 // registered apps
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
-                startActivityForResult(intent, CHOOSE_FILE_RESULT_CODE);
-                Log.d(WiFiDirectActivity.TAG, "pick image activity ends = ");
             }
         });
         builder.show();
+    }
+
+    public void startGame(){
+        ReceiveDataStorage.PLAYER_LABEL = (info.isGroupOwner)? 0:1;
+        ReceiveDataStorage.PLAYER_NUM = ipsNum;
+        ReceiveDataStorage.IS_CONNECTED = true;
+        ReceiveDataStorage.GAME_ACTIVE = false;
+        ReceiveDataStorage.GAME_STATE = softwarestudio.course.finalproject.flappyfriends.Utility.GAMESTATE_ONIDLE;
+
+        ReceiveDataStorage.pipePairs = new ArrayList<>();
+
+        ReceiveDataStorage.birds = new ArrayList<>();
+
+        ReceiveDataStorage.commands = new ArrayList<>();
+        ReceiveDataStorage.commandQueue = new ArrayDeque<>();
+
+        Intent intent = new Intent(getActivity(), GameActivity.class);
+        startActivity(intent);
     }
 
     private void transferIps(){
@@ -236,6 +265,27 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
     }
 
+    public void sendJump() throws Exception {
+        if(ipsNum >= 2){
+            sendJumpDetail(groupIps[1]);
+        }
+
+
+    }
+
+    public void sendJumpDetail(String dstIp) throws Exception {
+
+        //TextView statusText = (TextView) mContentView.findViewById(R.id.status_text);
+        Intent serviceIntent = new Intent(getActivity(), FileTransferService.class);
+        serviceIntent.setAction(FileTransferService.ACTION_SEND_JUMP);
+
+        serviceIntent.putExtra(FileTransferService.EXTRAS_DST_ADDRESS, dstIp);
+        Log.d(WiFiDirectActivity.TAG, "send jump to = " + dstIp);
+        getActivity().startService(serviceIntent);
+
+
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -243,7 +293,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         // FileTransferService.
         Uri uri = data.getData();
         TextView statusText = (TextView) mContentView.findViewById(R.id.status_text);
-        statusText.setText("Sending: " + uri);
+        if(statusText != null)statusText.setText("Sending: " + uri);
         Log.d(WiFiDirectActivity.TAG, "Sending: " + uri);
         Log.d(WiFiDirectActivity.TAG, "Sending: " + uri.toString());
         Intent serviceIntent = new Intent(getActivity(), FileTransferService.class);
@@ -259,7 +309,35 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         getActivity().startService(serviceIntent);
     }
 
+    public void pressToConnect(WifiP2pDevice device){
+        this.device = device;
+        this.getView().setVisibility(View.VISIBLE);
+        boolean isConnect = (device.status == WifiP2pDevice.CONNECTED);
+        if(!isConnect){
+            localIp = Utility.getLocalIpAddress();
+            Log.d(WiFiDirectActivity.TAG, "connect botton... localIp = " + localIp);
+            WifiP2pConfig config = new WifiP2pConfig();
+            config.deviceAddress = device.deviceAddress;
+            config.wps.setup = WpsInfo.PBC;
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+            progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel",
+                    "Connecting to :" + device.deviceAddress, true, true
+//                        new DialogInterface.OnCancelListener() {
+//
+//                            @Override
+//                            public void onCancel(DialogInterface dialog) {
+//                                ((DeviceActionListener) getActivity()).cancelDisconnect();
+//                            }
+//                        }
+            );
+            ((DeviceActionListener) getActivity()).connect(config);
+        }else{
+            ((DeviceActionListener) getActivity()).disconnect();
+        }
 
+    }
     @Override
     public void onConnectionInfoAvailable(final WifiP2pInfo info) {
         Log.d(WiFiDirectActivity.TAG, "onConnect start!!");
@@ -270,14 +348,17 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             progressDialog.dismiss();
         }
         this.info = info;
-        this.getView().setVisibility(View.VISIBLE);
+        View view0 = this.getView();
+        if(view0 != null) view0.setVisibility(View.VISIBLE);
         // The owner IP is now known.
         TextView view = (TextView) mContentView.findViewById(R.id.group_owner);
-        view.setText(getResources().getString(R.string.group_owner_text)
-                + ((info.isGroupOwner == true) ? getResources().getString(R.string.yes)
-                : getResources().getString(R.string.no)));
-        view = (TextView) mContentView.findViewById(R.id.device_info);
-        view.setText("Group Owner IP - " + info.groupOwnerAddress.getHostAddress());
+        if(view != null){
+            view.setText(getResources().getString(R.string.group_owner_text)
+                    + ((info.isGroupOwner == true) ? getResources().getString(R.string.yes)
+                    : getResources().getString(R.string.no)));
+            view = (TextView) mContentView.findViewById(R.id.device_info);
+            view.setText("Group Owner IP - " + info.groupOwnerAddress.getHostAddress());
+        }
         localIp = Utility.getLocalIpAddress();
         groupOwnerIp = info.groupOwnerAddress.getHostAddress();
         isGroupOwner = info.isGroupOwner;
@@ -308,14 +389,16 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
         // The other device acts as the client. In this case, we enable the
         // get file button.
-        mContentView.findViewById(R.id.btn_start_client).setVisibility(View.VISIBLE);
-        mContentView.findViewById(R.id.btn_send_ip).setVisibility(View.VISIBLE);
-        ((TextView) mContentView.findViewById(R.id.status_text)).setText(getResources()
+        if(mContentView != null){
+            mContentView.findViewById(R.id.btn_start_client).setVisibility(View.VISIBLE);
+            mContentView.findViewById(R.id.btn_send_ip).setVisibility(View.VISIBLE);
+            ((TextView) mContentView.findViewById(R.id.status_text)).setText(getResources()
                 .getString(R.string.client_text));
-        //}
+            // hide the connect button
+            mContentView.findViewById(R.id.btn_connect).setVisibility(View.GONE);
 
-        // hide the connect button
-        mContentView.findViewById(R.id.btn_connect).setVisibility(View.GONE);
+        }
+
         Log.d(WiFiDirectActivity.TAG, "onConnect fished!!");
     }
 
@@ -327,10 +410,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     public void showDetails(WifiP2pDevice device) {
         this.device = device;
         this.getView().setVisibility(View.VISIBLE);
-        TextView view = (TextView) mContentView.findViewById(R.id.device_address);
-        view.setText(device.deviceAddress);
-        view = (TextView) mContentView.findViewById(R.id.device_info);
-        view.setText(device.toString());
 
     }
 
@@ -339,14 +418,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
      */
     public void resetViews() {
         mContentView.findViewById(R.id.btn_connect).setVisibility(View.VISIBLE);
-        TextView view = (TextView) mContentView.findViewById(R.id.device_address);
-        view.setText(R.string.empty);
-        view = (TextView) mContentView.findViewById(R.id.device_info);
-        view.setText(R.string.empty);
-        view = (TextView) mContentView.findViewById(R.id.group_owner);
-        view.setText(R.string.empty);
-        view = (TextView) mContentView.findViewById(R.id.status_text);
-        view.setText(R.string.empty);
         mContentView.findViewById(R.id.btn_start_client).setVisibility(View.GONE);
         this.getView().setVisibility(View.GONE);
     }
@@ -477,6 +548,19 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                         Log.d(WiFiDirectActivity.TAG, "IP Server closed ");
                         return forwardIp;
 
+                    case Utility.jump_command:
+                        Log.d(WiFiDirectActivity.TAG, "jump");
+
+
+                        Command command = new Command((ReceiveDataStorage.PLAYER_LABEL == 0)? 1:0);
+                        ReceiveDataStorage.commands.add(command);
+
+
+
+                        serverSocket.close();
+                        Log.d(WiFiDirectActivity.TAG, "IP Server closed ");
+                        return forwardIp;
+
                     default:
                         return null;
 
@@ -539,5 +623,5 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         return true;
     }
 
-
 }
+
