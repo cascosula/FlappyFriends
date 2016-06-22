@@ -5,12 +5,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.DisplayMetrics;
 
-import org.andengine.engine.handler.timer.ITimerCallback;
-
 import softwarestudio.course.finalproject.flappyfriends.Creature.PipePair;
 
 /**
  * Created by lusa on 2016/06/18.
+ * Defined static final parameter and other supporting static function
  */
 public class Utility {
 
@@ -70,7 +69,7 @@ public class Utility {
 
             SharedPreferences.Editor editor = prefs.edit();
             editor.putInt("bestscore", newScore);
-            editor.commit();
+            editor.apply();
         }
     }
 }

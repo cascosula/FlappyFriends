@@ -21,6 +21,8 @@ import softwarestudio.course.finalproject.flappyfriends.GameActivity;
 
 /**
  * Created by lusa on 2016/06/19.
+ * Image(background, bird animated sprite, pipe pair sprites) generation
+ * No interact interface
  */
 public class ImageManager {
 

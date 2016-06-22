@@ -15,7 +15,7 @@ import softwarestudio.course.finalproject.flappyfriends.Utility;
 
 /**
  * Created by lusa on 2016/06/21.
- * Data exchange interface between game activity and static storage of receiver
+ * Data interact interface between game activity and static storage of receiver
  * Manage and Synchronize data of sprite from raw data
  */
 public class BirdManager {

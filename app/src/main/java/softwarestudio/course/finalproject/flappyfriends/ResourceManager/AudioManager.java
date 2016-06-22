@@ -10,6 +10,7 @@ import java.io.IOException;
 
 /**
  * Created by lusa on 2016/06/21.
+ * Audio resource generation, storage, access interface
  */
 public class AudioManager {
 

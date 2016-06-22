@@ -1,7 +1,5 @@
 package softwarestudio.course.finalproject.flappyfriends;
 
-import android.support.v7.widget.LinearLayoutCompat;
-
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.timer.ITimerCallback;
 import org.andengine.engine.handler.timer.TimerHandler;
@@ -12,15 +10,11 @@ import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.background.ParallaxBackground;
-import org.andengine.entity.sprite.Sprite;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 
 import java.io.IOException;
 
-import softwarestudio.course.finalproject.flappyfriends.Creature.Bird;
-import softwarestudio.course.finalproject.flappyfriends.Creature.Pipe;
-import softwarestudio.course.finalproject.flappyfriends.Creature.PipePair;
 import softwarestudio.course.finalproject.flappyfriends.Receiver.ReceiveDataStorage;
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.AudioManager;
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.BirdManager;
@@ -28,11 +22,11 @@ import softwarestudio.course.finalproject.flappyfriends.ResourceManager.FontMana
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.ImageManager;
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.PipeManager;
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.SceneManager;
-import softwarestudio.course.finalproject.flappyfriends.ResourceManager.SoundManager;
 import softwarestudio.course.finalproject.flappyfriends.ResourceManager.TextManager;
 
 /**
  * Created by lusa on 2016/06/18.
+ * Main game activity
  */
 public class GameActivity extends SimpleBaseGameActivity {
 
@@ -41,7 +35,6 @@ public class GameActivity extends SimpleBaseGameActivity {
 
     private Camera mCamera = null;
 
-    private SoundManager mSoundManager = null;
     private AudioManager mAudioManager = null;
     private FontManager mFontManager = null;
     private TextManager mTextManager = null;
@@ -64,7 +57,6 @@ public class GameActivity extends SimpleBaseGameActivity {
         CAMERA_HEIGHT = 800;
         CAMERA_WIDTH = Utility.calculateScreenWidth(this, CAMERA_HEIGHT);
 
-        //mSoundManager = new SoundManager(this);
         mAudioManager = new AudioManager(this);
         mFontManager = new FontManager(this);
         mTextManager = new TextManager(this, mFontManager.getFont());

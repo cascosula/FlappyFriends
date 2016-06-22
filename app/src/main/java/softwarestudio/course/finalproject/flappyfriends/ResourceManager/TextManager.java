@@ -13,6 +13,10 @@ import softwarestudio.course.finalproject.flappyfriends.Utility;
 
 /**
  * Created by lusa on 2016/06/21.
+ * Score board interact interface including private generation of storage
+ * Display mode : full socre board, counting score board, best score board
+ * :: Caution ::
+ * Full score board ready position is out of screen. Call descend function to move down it
  */
 public class TextManager {
 
