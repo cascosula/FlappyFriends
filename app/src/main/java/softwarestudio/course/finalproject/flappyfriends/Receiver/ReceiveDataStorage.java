@@ -98,7 +98,7 @@ public class ReceiveDataStorage {
     }
 
     /**
-     * Input new bird list
+     * * Input new bird list
      * If the size of new data does not fetch to original list
      * data in original list clears and takes in elements in new data
      * As a game host,

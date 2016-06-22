@@ -12,12 +12,13 @@ import java.util.List;
 import softwarestudio.course.finalproject.flappyfriends.Creature.Pipe;
 import softwarestudio.course.finalproject.flappyfriends.Creature.PipePair;
 import softwarestudio.course.finalproject.flappyfriends.GameActivity;
-import softwarestudio.course.finalproject.flappyfriends.R;
 import softwarestudio.course.finalproject.flappyfriends.Receiver.ReceiveDataStorage;
 import softwarestudio.course.finalproject.flappyfriends.Utility;
 
 /**
- * Created by lusa on 2016/06/19.
+ * Created by lusa on 2016/06/21.
+ * Data exchange interface between game activity and static storage of receiver
+ * Manage and Synchronize data of sprite from raw data
  */
 public class PipeManager {
 
@@ -148,14 +149,12 @@ public class PipeManager {
 
     private List<PipePairSprite> pairPipeSprites;
 
-    private SimpleBaseGameActivity context;
-    private ImageManager imageManager;
-    private Scene scene;
-
     /**
      * Build unset pipe pair initially
-     * @param context
-     * @param imageManager
+     * @param context {game activity}
+     * @param imageManager {image manager}
+     * @param pipenum {number of pipe pair}
+     * @throws IllegalArgumentException
      */
     public PipeManager(
             SimpleBaseGameActivity context,
@@ -189,18 +188,17 @@ public class PipeManager {
 
     /**
      * Attach all pair pipes to scene
-     * @param scene
+     * @param scene {scene}
      */
     public void AttachToScene(Scene scene) {
         if (scene == null) return;
 
-        this.scene = scene;
         if (pairPipeSprites != null) {
             int size = pairPipeSprites.size();
             for (int i=0; i<size; i++) {
                 PipePairSprite cur = pairPipeSprites.get(i);
-                this.scene.attachChild(cur.getUpperSprite());
-                this.scene.attachChild(cur.getLowerSprite());
+                scene.attachChild(cur.getUpperSprite());
+                scene.attachChild(cur.getLowerSprite());
             }
         }
     }
@@ -248,8 +246,9 @@ public class PipeManager {
 
     public boolean isCollided(Sprite sprite) {
         if (sprite == null) return false;
-        if (pairPipeSprites == null && pairPipeSprites.size() == 0)
-            return false;
+        if (pairPipeSprites == null) return false;
+        if (pairPipeSprites.size() == 0) return false;
+
         boolean check = false;
         int size = pairPipeSprites.size();
         for (int i=0; i<size && !check; i++)
@@ -259,8 +258,9 @@ public class PipeManager {
 
     public boolean isPassed(Sprite sprite) {
         if (sprite == null) return false;
-        if (pairPipeSprites == null && pairPipeSprites.size() == 0)
-            return false;
+        if (pairPipeSprites == null) return false;
+        if (pairPipeSprites.size() == 0) return false;
+
         boolean check = false;
         int size = pairPipeSprites.size();
         for (int i=0; i<size && !check; i++)
@@ -284,15 +284,6 @@ public class PipeManager {
             pairPipeSprites.get(i).modifyPipePair(
                     newdata.get(i)
             );
-        }
-        if (originsize == newsize) {
-            for (int i=0; i<originsize; i++) {
-                pairPipeSprites.get(i).modifyPipePair(
-                        newdata.get(i)
-                );
-            }
-        } else {
-            // deal with data size not fetched
         }
     }
 

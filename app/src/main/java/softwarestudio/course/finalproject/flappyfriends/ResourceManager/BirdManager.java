@@ -2,7 +2,6 @@ package softwarestudio.course.finalproject.flappyfriends.ResourceManager;
 
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.AnimatedSprite;
-import org.andengine.entity.sprite.Sprite;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 
 import java.util.ArrayList;
@@ -11,12 +10,13 @@ import java.util.List;
 import softwarestudio.course.finalproject.flappyfriends.Creature.Bird;
 import softwarestudio.course.finalproject.flappyfriends.Creature.Command;
 import softwarestudio.course.finalproject.flappyfriends.GameActivity;
-import softwarestudio.course.finalproject.flappyfriends.R;
 import softwarestudio.course.finalproject.flappyfriends.Receiver.ReceiveDataStorage;
 import softwarestudio.course.finalproject.flappyfriends.Utility;
 
 /**
  * Created by lusa on 2016/06/21.
+ * Data exchange interface between game activity and static storage of receiver
+ * Manage and Synchronize data of sprite from raw data
  */
 public class BirdManager {
 
@@ -127,9 +127,9 @@ public class BirdManager {
      * Build array list of birds. Initial new array list
      * Number of bird is determined by "playernum"
      * Animated spite returns form {@link ImageManager}
-     * @param context
-     * @param imageManager
-     * @param playernum
+     * @param context {actitivity}
+     * @param imageManager {image manager}
+     * @param playernum {number of players}
      * @throws IllegalArgumentException
      */
     public BirdManager(
@@ -161,7 +161,7 @@ public class BirdManager {
 
     /**
      * Attach all bird sprites to scene
-     * @param scene
+     * @param scene {scene}
      */
     public void AttachToScene(Scene scene) {
         if (scene == null) return;
@@ -283,9 +283,9 @@ public class BirdManager {
     }
 
     private void ExecuteCommands() {
+        if (commands == null) return;
+        if (commands.size() <= 0)return;
 
-        if (commands == null && commands.size() <= 0)
-            return;
         int size = commands.size();
         for (int i=0; i<size; i++) {
             int target = commands.get(i).getCommandTarget();
