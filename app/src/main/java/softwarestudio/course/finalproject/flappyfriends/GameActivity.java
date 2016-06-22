@@ -122,9 +122,11 @@ public class GameActivity extends SimpleBaseGameActivity {
             public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
                 if (pSceneTouchEvent.isActionDown()) {
                     switch (ReceiveDataStorage.getGameState()) {
-                        case Utility.GAMESTATE_ONPREPARE:
-                            if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST)
+                        case Utility.GAMESTATE_ONIDLE:
+                            if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
                                 ReceiveDataStorage.setGameActivation(true);
+                                ReceiveDataStorage.setGameState(Utility.GAMESTATE_ONPREPARE);
+                            }
                             break;
                         case Utility.GAMESTATE_ONOPERATE:
                             if (ReceiveDataStorage.getGameActivation()) {
@@ -182,12 +184,11 @@ public class GameActivity extends SimpleBaseGameActivity {
 
             private void onIdle() {
                 curScore = 0;
-                if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST)
-                    ReceiveDataStorage.setGameState(Utility.GAMESTATE_ONPREPARE);
+                mBirdManager.setAtVerticalMiddle();
+                mTextManager.showBestScoreOnly();
             }
 
             private void onPrepare() {
-                mTextManager.showBestScoreOnly();
                 mPipeManager.setReadyPosition();
                 mBirdManager.setReadyPosition();
                 // if only one player(non-multi-player mode)

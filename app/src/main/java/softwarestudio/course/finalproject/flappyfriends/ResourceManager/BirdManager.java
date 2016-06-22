@@ -173,7 +173,7 @@ public class BirdManager {
     }
 
     public void setReadyPosition() {
-        float start = GameActivity.getCameraWidth() / 2 - Bird.getBirdWith() / 2;
+        float start = GameActivity.getCameraWidth() / 4;
         int size = birdSprites.size();
         for (int i=0; i<size; i++) {
             BirdSprite cur = birdSprites.get(i);
@@ -182,6 +182,17 @@ public class BirdManager {
             cur.setAngle(0);
             cur.setSpeed(0);
             start -= Bird.getBirdWith() * 4 / 3;
+        }
+    }
+
+    public void setAtVerticalMiddle() {
+        int size = birdSprites.size();
+        for (int i=0; i<size; i++) {
+            BirdSprite cur = birdSprites.get(i);
+            cur.setX(GameActivity.getCameraWidth() / 2);
+            cur.setY(GameActivity.getCameraHeight() / 2);
+            cur.setAngle(0);
+            cur.setSpeed(0);
         }
     }
 

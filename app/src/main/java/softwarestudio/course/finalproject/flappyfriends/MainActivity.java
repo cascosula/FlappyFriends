@@ -12,11 +12,5 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //SoundManager soundManager = new SoundManager(this);
-        //soundManager.startAudio(R.raw.backgroundmusic);
-
-        Intent intent = new Intent(this, GameActivity.class);
-        startActivity(intent);
     }
 }
