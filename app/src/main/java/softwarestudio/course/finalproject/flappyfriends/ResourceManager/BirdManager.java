@@ -22,10 +22,6 @@ public class BirdManager {
 
     private final static String LOG_TAG = BirdManager.class.getSimpleName();
 
-    public final static int MAX_BIRDS = 2;
-
-    private SimpleBaseGameActivity context;
-
     // parameter used by game host
     private static List<Command> commands;
 
@@ -146,7 +142,6 @@ public class BirdManager {
         if (playernum <= 0)
             throw new IllegalArgumentException("Illegal Player Number");
 
-        this.context = context;
         birdSprites = new ArrayList<>();
 
         for (int i=0; i<playernum; i++) {
@@ -178,24 +173,47 @@ public class BirdManager {
     }
 
     public void setReadyPosition() {
-        float start = GameActivity.getCameraWidth() / 4;
-        int size = birdSprites.size();
-        for (int i=0; i<size; i++) {
-            BirdSprite cur = birdSprites.get(i);
-            cur.setX(start);
-            cur.setY(GameActivity.getCameraHeight() / 2);
-            cur.setAngle(0);
-            cur.setSpeed(0);
-            start -= Bird.getBirdWith() * 4 / 3;
+        if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
+            LineUpBirds(GameActivity.getCameraWidth() / 4);
+            AlignOnY(GameActivity.getCameraHeight() / 2);
+            if (ReceiveDataStorage.getConnection())
+                FeedBackBirdData();
+        } else {
+            if (ReceiveDataStorage.getConnection())
+                FeedBackBirdData();
         }
     }
 
     public void setAtVerticalMiddle() {
+        if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
+            LineUpBirds(GameActivity.getCameraWidth() / 2);
+            AlignOnY(GameActivity.getCameraHeight() / 2);
+            if (ReceiveDataStorage.getConnection())
+                FeedBackBirdData();
+        } else {
+            if (ReceiveDataStorage.getConnection())
+                FeedBackBirdData();
+        }
+    }
+
+    private void LineUpBirds(float start) {
+        if (birdSprites == null) return;
         int size = birdSprites.size();
         for (int i=0; i<size; i++) {
             BirdSprite cur = birdSprites.get(i);
-            cur.setX(GameActivity.getCameraWidth() / 2);
-            cur.setY(GameActivity.getCameraHeight() / 2);
+            cur.setX(start);
+            cur.setAngle(0);
+            cur.setSpeed(0);
+            start -= (Bird.getBirdWith()+10);
+        }
+    }
+
+    private void AlignOnY(float y) {
+        if (birdSprites == null) return;
+        int size = birdSprites.size();
+        for (int i=0; i<size; i++) {
+            BirdSprite cur = birdSprites.get(i);
+            cur.setY(y);
             cur.setAngle(0);
             cur.setSpeed(0);
         }
@@ -226,15 +244,13 @@ public class BirdManager {
         ExecuteCommands();
     }
 
-    private void FetchBirdData(List<Bird> newdata) {
+    private void FetchBirdData() {
+        List<Bird> newdata = ReceiveDataStorage.getBirds();
         if (newdata == null || newdata.size() == 0)
             return;
         int originsize = birdSprites.size();
         int newsize = newdata.size();
-        newsize = newsize > Utility.MAX_PLAYERS ?
-                Utility.MAX_PLAYERS : newsize;
-        int size = newsize > originsize ?
-                originsize : newsize;
+        int size = Math.min(originsize, newsize);
 
         for (int i=0; i<size; i++) {
             BirdSprite cur = birdSprites.get(i);
@@ -252,19 +268,17 @@ public class BirdManager {
     }
 
     public void FetchCommand() {
-        if (ReceiveDataStorage.getPlayerLabel()
-                == Utility.TARGET_HOST) {
-            if (!ReceiveDataStorage.getConnection()) {
-                ReceiveDataStorage.FetchCommandQueueToCommandList();
-            }
+        if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
+            ReceiveDataStorage.FetchCommandQueueToCommandList();
             commands = ReceiveDataStorage.getCommandListCopyAndClearOrigin();
-            if (commands.size() > 0)
-                ExecuteCommands();
+            ExecuteCommands();
             moveBirds();
+            if (ReceiveDataStorage.getConnection())
+                FeedBackBirdData();
         } else if (ReceiveDataStorage.getPlayerLabel() > Utility.TARGET_HOST) {
             // As a multi-player participant
-            List<Bird> newdata = ReceiveDataStorage.getBirds();
-            FetchBirdData(newdata);
+            if (ReceiveDataStorage.getConnection())
+                FetchBirdData();
         }
     }
 

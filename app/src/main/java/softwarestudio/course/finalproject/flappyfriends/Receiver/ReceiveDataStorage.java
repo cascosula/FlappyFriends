@@ -17,10 +17,10 @@ import softwarestudio.course.finalproject.flappyfriends.Utility;
  * Created by lusa on 2016/06/20.
  * :: Data path ::
  * As a game host(if at multi-player game)--
- *            addCommandToCommandQueue(...)             getCommandFromCommandQueue()
- * BirdManger==============================>DataStorage=============================>Receiver
- *          setCommandsData(...)             getCommandListCopyAndClearOrigin()
- * Receiver=====================>DataStorage===================================>BirdManager
+ *            addCommandToCommandQueue(...)             FetchCommandQueueToCommandList()
+ * BirdManger==============================>DataStorage=================================>DataStorage
+ *          addCommandToCommandList(...)             getCommandListCopyAndClearOrigin()
+ * Receiver=============================>DataStorage===================================>BirdManager
  *             setBirdsData(...)             getBirds()
  * BirdManager==================>DataStorage===========>Receiver
  *             setPipePairsData(...)             getPipePairs()
@@ -35,10 +35,12 @@ import softwarestudio.course.finalproject.flappyfriends.Utility;
  * Receiver======================>DataStorage===============>PipeManager
  *
  * :: Caution ::
- * Command List is assessed only by gama host
+ * Command List is assessed only by "GAME HOST"
  * Command Queue can be assessed "EITHER"
  * Set the static parameter "PLAYER_LABER" for recognition as a host or participant
  * (0:host >0:participant defined in Utility)
+ * Set the static parameter "IS_CONNECTED" for recognition of wifi connection
+ * (true:connected false:disconnected)
  */
 public class ReceiveDataStorage {
 

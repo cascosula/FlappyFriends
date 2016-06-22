@@ -186,9 +186,9 @@ public class GameActivity extends SimpleBaseGameActivity {
 
             private void onIdle() {
                 ReceiveDataStorage.setMyscoreZero();
+                mTextManager.showBestScoreBoard();
                 mPipeManager.setReadyPosition();
                 mBirdManager.setAtVerticalMiddle();
-                mTextManager.showBestScoreBoard();
             }
 
             private void onPrepare() {
@@ -196,10 +196,8 @@ public class GameActivity extends SimpleBaseGameActivity {
                 // if only one player(non-multi-player mode)
                 // game starts as screen touched
                 // else starts after 3s
-                if (ReceiveDataStorage.getGameActivation()
-                        && ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
-                    ReceiveDataStorage
-                            .setGameState(Utility.GAMESTATE_ONOPERATE);
+                if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
+                    ReceiveDataStorage.setGameState(Utility.GAMESTATE_ONOPERATE);
                 }
             }
 

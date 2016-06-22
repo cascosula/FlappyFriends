@@ -217,25 +217,32 @@ public class PipeManager {
         if (ReceiveDataStorage.getPlayerLabel() > Utility.TARGET_HOST
                 && ReceiveDataStorage.getConnection()) {
             // If as a multi-player game participant
-            FetchPipePairData();
+            if (ReceiveDataStorage.getConnection())
+                FetchPipePairData();
         } else if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
             // If as a game host
             movePipePairSprites();
 
             // send back data to receiver storage
             // if at multi-player game
-            if (ReceiveDataStorage.getConnection()) {
+            if (ReceiveDataStorage.getConnection())
                 FeedBackPipePairData();
-            }
         }
     }
 
     public void setReadyPosition() {
-        if (pairPipeSprites == null || pairPipeSprites.size() == 0)
-            return;
-        int size = pairPipeSprites.size();
-        for (int i=0; i<size; i++) {
-            pairPipeSprites.get(i).moveoutofRightBound();
+        if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
+            if (pairPipeSprites == null || pairPipeSprites.size() == 0)
+                return;
+            int size = pairPipeSprites.size();
+            for (int i=0; i<size; i++) {
+                pairPipeSprites.get(i).moveoutofRightBound();
+            }
+            if (ReceiveDataStorage.getConnection())
+                FeedBackPipePairData();
+        } else {
+            if (ReceiveDataStorage.getConnection())
+                FetchPipePairData();
         }
     }
 
