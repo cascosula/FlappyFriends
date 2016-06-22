@@ -24,6 +24,20 @@ public class PipePair {
         this.lowerPipe = lowerPipe;
     }
 
+    public PipePair(float alignX, float spawnPoint) {
+        upperPipe = new Pipe();
+        lowerPipe = new Pipe();
+        setAlignX(alignX);
+        setSpawnPoint(spawnPoint);
+    }
+
+    public PipePair(float spawnPoint) {
+        upperPipe = new Pipe();
+        lowerPipe = new Pipe();
+        setAlignX(GameActivity.getCameraWidth() + 2*Pipe.getPipeWidth());
+        setSpawnPoint(spawnPoint);
+    }
+
     public void ReplaceData(PipePair pipePair) {
         if (pipePair == null) return;
         if (pipePair.getUpperPipe() == null

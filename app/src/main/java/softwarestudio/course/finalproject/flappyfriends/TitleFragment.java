@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import softwarestudio.course.finalproject.flappyfriends.Wifidirect.WiFiDirectActivity;
+
 
 public class TitleFragment extends Fragment {
 
@@ -41,7 +43,8 @@ public class TitleFragment extends Fragment {
         mpbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent intent = new Intent(getActivity(), WiFiDirectActivity.class);
+                startActivity(intent);
             }
         });
 

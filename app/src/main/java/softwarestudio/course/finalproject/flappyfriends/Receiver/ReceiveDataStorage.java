@@ -59,6 +59,8 @@ public class ReceiveDataStorage {
     private static List<Command> commands = new ArrayList<>();
     private static Queue<Command> commandQueue = new ArrayDeque<>();
 
+    private static Queue<Float> spawnPointQueue = new ArrayDeque<>();
+
     public static void setPlayerLabel(int label) {
         if (label < Utility.TARGET_NULL)
             PLAYER_LABEL = label;
@@ -130,6 +132,16 @@ public class ReceiveDataStorage {
         }
     }
 
+    public static void addSpawnPointsToQueue(float[] spawnPoints) {
+        if (spawnPoints == null) return;
+        if (spawnPoints.length == 0) return;
+
+        int size = spawnPoints.length;
+        for (int i=0; i<size; i++) {
+            spawnPointQueue.add(spawnPoints[i]);
+        }
+    }
+
     /**
      * Input new bird list
      * If the size of new data does not fetch to original list
@@ -162,6 +174,7 @@ public class ReceiveDataStorage {
             }
         }
     }
+
 
     /**
      * Add new command as queue
@@ -246,6 +259,8 @@ public class ReceiveDataStorage {
     public static List<PipePair> getPipePairs() {
         return pipePairs;
     }
+
+    public static float getSpawnPointFromQueue() { return spawnPointQueue.poll(); }
 
     /**
      * Assessed by {@link softwarestudio.course.finalproject.flappyfriends.ResourceManager.BirdManager}

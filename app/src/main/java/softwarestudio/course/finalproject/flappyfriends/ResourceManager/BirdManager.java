@@ -238,8 +238,13 @@ public class BirdManager {
     }
 
     public void SendCommand() {
+        Bird me = birdSprites.get(ReceiveDataStorage.getPlayerLabel()).getBird();
         ReceiveDataStorage.addCommandToCommandQueue(
-                new Command(ReceiveDataStorage.getPlayerLabel())
+                new Command(
+                        ReceiveDataStorage.getPlayerLabel()
+                        //me.getY(),
+                        //me.getAngle()
+                )
         );
         ExecuteCommands();
     }
@@ -288,9 +293,14 @@ public class BirdManager {
 
         int size = commands.size();
         for (int i=0; i<size; i++) {
+            Command command = commands.get(i);
             int target = commands.get(i).getCommandTarget();
-            if (target < Utility.TARGET_NULL)
+            if (target < Utility.TARGET_NULL) {
+                BirdSprite me = birdSprites.get(target);
+                //me.setY(command.getTargetY());
+                //me.setAngle(command.getTargetAngle());
                 birdSprites.get(target).BirdJump();
+            }
         }
 
         /*

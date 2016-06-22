@@ -7,18 +7,18 @@ import softwarestudio.course.finalproject.flappyfriends.Utility;
  */
 public class Command {
 
-    private int target = Utility.TARGET_HOST;
+    private int commandTarget = Utility.TARGET_HOST;
 
     public Command(int target) {
         setCommandTarget(target);
     }
 
-    public void setCommandTarget(int target) {
-        if (target < Utility.MAX_PLAYERS)
-            this.target = target;
+    public void setCommandTarget(int commandTarget) {
+        if (commandTarget < Utility.MAX_PLAYERS)
+            this.commandTarget = commandTarget;
         else
-            this.target = Utility.TARGET_NULL;
+            this.commandTarget = Utility.TARGET_NULL;
     }
 
-    public int getCommandTarget() { return target; }
+    public int getCommandTarget() { return commandTarget; }
 }

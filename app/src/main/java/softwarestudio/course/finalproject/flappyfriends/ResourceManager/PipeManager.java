@@ -332,9 +332,12 @@ public class PipeManager {
                     && pipePairTail < pairPipeSprites.size()) {
                 PipePairSprite cur = pairPipeSprites.get(pipePairTail);
                 if (cur.outofRightScreenBound()) {
-                    cur.setPipePairSpawnPoint(
-                            Utility.randomSpwanPostion()
-                    );
+                    float spawnpoint = 0;
+                    if (ReceiveDataStorage.getConnection())
+                        spawnpoint = ReceiveDataStorage.getSpawnPointFromQueue();
+                    else
+                        spawnpoint = Utility.randomSpwanPostion();
+                    cur.setPipePairSpawnPoint(spawnpoint);
                     cur.movetoReadyPosition();
                     pipePairTail++;
                     pipePairTail %= pairPipeSprites.size();
