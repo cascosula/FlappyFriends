@@ -24,6 +24,8 @@ public class BirdManager {
 
     public final static int MAX_BIRDS = 2;
 
+    private SimpleBaseGameActivity context;
+
     // parameter used by game host
     private static List<Command> commands;
 
@@ -144,6 +146,7 @@ public class BirdManager {
         if (playernum <= 0)
             throw new IllegalArgumentException("Illegal Player Number");
 
+        this.context = context;
         birdSprites = new ArrayList<>();
 
         for (int i=0; i<playernum; i++) {

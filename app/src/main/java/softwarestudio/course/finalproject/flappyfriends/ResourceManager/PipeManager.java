@@ -218,18 +218,14 @@ public class PipeManager {
                 && ReceiveDataStorage.getConnection()) {
             // If as a multi-player game participant
             FetchPipePairData();
-        } else {
+        } else if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
             // If as a game host
             movePipePairSprites();
 
             // send back data to receiver storage
             // if at multi-player game
             if (ReceiveDataStorage.getConnection()) {
-                int size = pairPipeSprites.size();
-                List<PipePair> data = new ArrayList<>();
-                for (int i=0; i<size; i++)
-                    data.add(pairPipeSprites.get(i).getPipePair());
-                ReceiveDataStorage.setPipePairsData(data);
+                FeedBackPipePairData();
             }
         }
     }
@@ -276,6 +272,12 @@ public class PipeManager {
         List<PipePair> newdata = ReceiveDataStorage.getPipePairs();
         int originsize = pairPipeSprites.size();
         int newsize = newdata.size();
+        int size = Math.min(originsize, newsize);
+        for (int i=0; i<size; i++) {
+            pairPipeSprites.get(i).modifyPipePair(
+                    newdata.get(i)
+            );
+        }
         if (originsize == newsize) {
             for (int i=0; i<originsize; i++) {
                 pairPipeSprites.get(i).modifyPipePair(
@@ -285,6 +287,17 @@ public class PipeManager {
         } else {
             // deal with data size not fetched
         }
+    }
+
+    private void FeedBackPipePairData() {
+        if (pairPipeSprites == null)
+            return;
+        List<PipePair> data = new ArrayList<>();
+        int size = pairPipeSprites.size();
+        for (int i=0; i<size; i++) {
+            data.add(pairPipeSprites.get(i).getPipePair());
+        }
+        ReceiveDataStorage.setPipePairsData(data);
     }
 
     /**
