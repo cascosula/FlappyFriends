@@ -59,8 +59,6 @@ public class GameActivity extends SimpleBaseGameActivity {
 
     private float mCurrentWorldPosition = 0;
 
-    private int curScore = 0;
-
     @Override
     protected void onCreateResources() throws IOException {
         CAMERA_HEIGHT = 800;
@@ -114,9 +112,9 @@ public class GameActivity extends SimpleBaseGameActivity {
                 (ParallaxBackground) mBackGround
         );
         mScene = mSceneManager.buildScene();
-        mTextManager.AttachToScene(mScene);
         mPipeManager.AttachToScene(mScene);
         mBirdManager.AttachToScene(mScene);
+        mTextManager.AttachToScene(mScene);
         mScene.setOnSceneTouchListener(new IOnSceneTouchListener() {
             @Override
             public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
@@ -135,7 +133,6 @@ public class GameActivity extends SimpleBaseGameActivity {
                                         AudioManager.AUDIOLABEL_JUMP
                                 );
                             }
-                            curScore++;
                             break;
                         case Utility.GAMESTATE_ONSTOP:
                             /*
@@ -183,13 +180,13 @@ public class GameActivity extends SimpleBaseGameActivity {
 
 
             private void onIdle() {
-                curScore = 0;
+                ReceiveDataStorage.setMyscoreZero();
+                mPipeManager.setReadyPosition();
                 mBirdManager.setAtVerticalMiddle();
-                mTextManager.showBestScoreOnly();
+                mTextManager.showBestScoreBoard();
             }
 
             private void onPrepare() {
-                mPipeManager.setReadyPosition();
                 mBirdManager.setReadyPosition();
                 // if only one player(non-multi-player mode)
                 // game starts as screen touched
@@ -203,12 +200,19 @@ public class GameActivity extends SimpleBaseGameActivity {
 
             private void onOperate() {
                 mAudioManager.playAudio(AudioManager.AUDIOLABEL_BGM);
-                mTextManager.setScoreText(curScore);
-                mTextManager.setCurrentScoreBoard();
-                mTextManager.setScoreText(curScore);
+
+                mTextManager.showCountingScoreBoard();
+
                 mCurrentWorldPosition -= SCROLL_SPEED;
+
                 mPipeManager.receiveCommand();
+
                 mBirdManager.FetchCommand();
+
+                if (mBirdManager.checkSelfBirdPassPipePair(mPipeManager)) {
+                    ReceiveDataStorage.MyscoreIncremnet();
+                    mAudioManager.playAudio(AudioManager.AUDIOLABEL_SCOREUP);
+                }
                 if (mBirdManager.checkSelfBirdCollision(mPipeManager)) {
                     ReceiveDataStorage.setGameActivation(false);
                     mAudioManager.playAudio(AudioManager.AUDIOLABEL_GAMEOVER);
@@ -216,18 +220,21 @@ public class GameActivity extends SimpleBaseGameActivity {
                 if (!ReceiveDataStorage.getGameActivation()
                         && ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
                     ReceiveDataStorage.setGameState(Utility.GAMESTATE_ONSTOP);
-                    mTextManager.setScoreBoardReady(curScore);
-                    mPipeManager.setReadyPosition();
+                    mTextManager.setFullScoreBoardReady();
+                    //mPipeManager.setReadyPosition();
                 }
             }
 
             private void onStop() {
                 mAudioManager.pauseAudio(AudioManager.AUDIOLABEL_BGM);
+
+                // let the bird falls down to the floor
                 mBirdManager.FetchCommand();
+
                 if (ReceiveDataStorage.getConnection()) {
 
                 } else {
-                    if (!mTextManager.isAboveHalfScreen()) {
+                    if (!mTextManager.isAboveHorizontalMiddle()) {
                         mTimerHandler = new TimerHandler(
                                 1.6f,
                                 false,
@@ -242,7 +249,7 @@ public class GameActivity extends SimpleBaseGameActivity {
                         );
                         mScene.registerUpdateHandler(mTimerHandler);
                     } else {
-                        mTextManager.moveScoreBoard();
+                        mTextManager.FullScoreBoardDescendAnimation();
                     }
                 }
             }

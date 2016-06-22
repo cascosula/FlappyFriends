@@ -207,6 +207,13 @@ public class BirdManager {
         return check;
     }
 
+    public boolean checkSelfBirdPassPipePair(PipeManager pipeManager) {
+        if (pipeManager == null) return false;
+
+        BirdSprite me = birdSprites.get(ReceiveDataStorage.getPlayerLabel());
+        return pipeManager.isPassed(me.getAnimatedSprite());
+    }
+
     public void SendCommand() {
         ReceiveDataStorage.addCommandToCommandQueue(
                 new Command(ReceiveDataStorage.getPlayerLabel())

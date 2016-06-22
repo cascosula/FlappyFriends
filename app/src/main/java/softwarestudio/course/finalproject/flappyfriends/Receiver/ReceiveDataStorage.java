@@ -1,5 +1,7 @@
 package softwarestudio.course.finalproject.flappyfriends.Receiver;
 
+import android.content.Context;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -46,6 +48,8 @@ public class ReceiveDataStorage {
     private static boolean GAME_ACTIVE = false;
     private static int GAME_STATE = Utility.GAMESTATE_ONIDLE;
 
+    private static int MYSCORE = 0;
+
     private static List<PipePair> pipePairs = new ArrayList<>();
 
     private static List<Bird> birds = new ArrayList<>();
@@ -76,6 +80,19 @@ public class ReceiveDataStorage {
         if (gameState >= Utility.GAMESTATE_NULL)
             return;
         GAME_STATE = gameState;
+    }
+
+    public static void MyscoreIncremnet() {
+        if (MYSCORE <= Utility.MAX_SCORE)
+            MYSCORE++;
+    }
+
+    public static void setMyscoreZero() {
+        MYSCORE = 0;
+    }
+
+    public static void UpdateMyscoreToSharedPerf(Context context) {
+        Utility.SetBestScore(context, MYSCORE);
     }
 
     /**
@@ -207,6 +224,8 @@ public class ReceiveDataStorage {
     public static boolean getGameActivation() { return GAME_ACTIVE; }
 
     public static int getGameState() { return GAME_STATE; }
+
+    public static int getMyscore() { return MYSCORE; }
 
     /**
      * Assessed by {@link softwarestudio.course.finalproject.flappyfriends.ResourceManager.BirdManager}

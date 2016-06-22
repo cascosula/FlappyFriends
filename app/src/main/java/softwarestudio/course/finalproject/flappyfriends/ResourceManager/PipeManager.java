@@ -39,6 +39,8 @@ public class PipeManager {
         private Sprite upperSprite;
         private Sprite lowerSprite;
 
+        private boolean passCount = false;
+
         public PipePairSprite(
                 PipePair pipePair,
                 Sprite upperSprite,
@@ -71,6 +73,17 @@ public class PipeManager {
                     || lowerSprite.collidesWith(sprite);
         }
 
+        public boolean isPassed(Sprite sprite) {
+            if (!passCount) {
+                if (sprite.getX() > getAlignX()) {
+                    passCount = true;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public boolean outofLeftScreenBound() {
             if (pipePair.getUpperPipe().getX() <= -1*Pipe.getPipeWidth()-10)
                 return true;
@@ -99,6 +112,7 @@ public class PipeManager {
         }
 
         public void movetoReadyPosition() {
+            passCount = false;
             setPipePairAlignX(
                     GameActivity.getCameraWidth() + Pipe.getPipeWidth());
         }
@@ -230,12 +244,24 @@ public class PipeManager {
     }
 
     public boolean isCollided(Sprite sprite) {
+        if (sprite == null) return false;
         if (pairPipeSprites == null && pairPipeSprites.size() == 0)
             return false;
         boolean check = false;
         int size = pairPipeSprites.size();
         for (int i=0; i<size && !check; i++)
             check |= pairPipeSprites.get(i).isCollided(sprite);
+        return check;
+    }
+
+    public boolean isPassed(Sprite sprite) {
+        if (sprite == null) return false;
+        if (pairPipeSprites == null && pairPipeSprites.size() == 0)
+            return false;
+        boolean check = false;
+        int size = pairPipeSprites.size();
+        for (int i=0; i<size && !check; i++)
+            check |= pairPipeSprites.get(i).isPassed(sprite);
         return check;
     }
 

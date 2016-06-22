@@ -8,6 +8,7 @@ import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.adt.align.HorizontalAlign;
 
 import softwarestudio.course.finalproject.flappyfriends.GameActivity;
+import softwarestudio.course.finalproject.flappyfriends.Receiver.ReceiveDataStorage;
 import softwarestudio.course.finalproject.flappyfriends.Utility;
 
 /**
@@ -43,30 +44,21 @@ public class TextManager {
         scene.attachChild(scoreText);
     }
 
-    public void setScoreBoard(int score) {
-        Utility.SetBestScore(context, score);
-        setScoreText(score);
-        setBestscoreText();
-        AllignOnMiddleLine();
-        bestscoreTitleText.setY(GameActivity.getCameraHeight() *7 /10);
-        bestscoreText.setY(GameActivity.getCameraHeight() *6 /10);
-        scoreTitleText.setY(GameActivity.getCameraHeight() *4 /10);
-        scoreText.setY(GameActivity.getCameraHeight() *3 /10);
-    }
+    public void setFullScoreBoardReady() {
+        AllignOnVerticalMiddle();
 
-    public void setScoreBoardReady(int score) {
-        Utility.SetBestScore(context, score);
-        setScoreText(score);
-        setBestscoreText();
-        AllignOnMiddleLine();
         y_AlignLine = GameActivity.getCameraHeight() * 3 /2;
+
+        setBestScoreText();
         bestscoreTitleText.setY(GameActivity.getCameraHeight() *17 /10);
         bestscoreText.setY(GameActivity.getCameraHeight() *16 /10);
+
+        setScoreText();
         scoreTitleText.setY(GameActivity.getCameraHeight() *14 /10);
         scoreText.setY(GameActivity.getCameraHeight() *13 /10);
     }
 
-    public void AllignOnMiddleLine() {
+    private void AllignOnVerticalMiddle() {
         float middle = GameActivity.getCameraWidth() / 2;
         bestscoreTitleText.setX(middle);
         bestscoreText.setX(middle);
@@ -74,7 +66,7 @@ public class TextManager {
         scoreText.setX(middle);
     }
 
-    public void moveScoreBoard() {
+    public void FullScoreBoardDescendAnimation() {
         if (y_AlignLine > GameActivity.getCameraHeight() / 2) {
             y_AlignLine += SCOREBOARD_SCROLL_SPEED;
             bestscoreTitleText.setY(
@@ -92,38 +84,45 @@ public class TextManager {
         }
     }
 
-    public boolean isAboveHalfScreen() {
+    public boolean isAboveHorizontalMiddle() {
         if (y_AlignLine > GameActivity.getCameraHeight() / 2)
             return true;
         return false;
     }
 
-    public void setBestscoreText() {
+    private void setBestScoreText() {
         if (context == null) return;
         int bestscore = Utility.GetBestScore(context);
         if (bestscore >= 0 && bestscore <= Utility.MAX_SCORE)
             bestscoreText.setText(Integer.toString(bestscore));
     }
 
-    public void setScoreText(int score) {
+    private void setScoreText() {
         if (scoreText == null) return;
+        int score = ReceiveDataStorage.getMyscore();
         if (score >= 0 && score <= Utility.MAX_SCORE)
             scoreText.setText(Integer.toString(score));
     }
 
-    public void setCurrentScoreBoard() {
+    public void showCountingScoreBoard() {
+        AllignOnVerticalMiddle();
+
         bestscoreTitleText.setY(GameActivity.getCameraHeight() *17 /10);
         bestscoreText.setY(GameActivity.getCameraHeight() *16 /10);
         scoreTitleText.setY(GameActivity.getCameraHeight() *14 /10);
+
+        setScoreText();
         scoreText.setX(GameActivity.getCameraWidth() / 2);
         scoreText.setY(GameActivity.getCameraHeight() *3 /10);
     }
 
-    public void showBestScoreOnly() {
-        setBestscoreText();
-        AllignOnMiddleLine();
+    public void showBestScoreBoard() {
+        AllignOnVerticalMiddle();
+
+        setBestScoreText();
         bestscoreTitleText.setY(GameActivity.getCameraHeight() *4 /10);
         bestscoreText.setY(GameActivity.getCameraHeight() *3 /10);
+
         scoreTitleText.setY(GameActivity.getCameraHeight() *14 /10);
         scoreText.setY(GameActivity.getCameraHeight() *13 /10);
     }
@@ -142,7 +141,7 @@ public class TextManager {
                 context.getVertexBufferObjectManager()
         );
 
-        text.setZIndex(1);
+        text.setZIndex(3);
         return text;
     }
 }

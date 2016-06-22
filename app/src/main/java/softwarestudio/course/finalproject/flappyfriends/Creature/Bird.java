@@ -25,7 +25,7 @@ public class Bird {
 
     public final static float MIN_Y_SPEED = -12.0f;
     public final static float GRAVITY_ACCEL = -0.04f;
-    public final static float FLAP_ACCEL = 6f;
+    public final static float FLAP_ACCEL = 7.5f;
 
     private float x;
     private float y;
