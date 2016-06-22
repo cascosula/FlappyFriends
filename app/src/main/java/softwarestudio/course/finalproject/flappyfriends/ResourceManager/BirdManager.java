@@ -1,6 +1,7 @@
 package softwarestudio.course.finalproject.flappyfriends.ResourceManager;
 
 import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.background.RepeatingSpriteBackground;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 
@@ -172,6 +173,16 @@ public class BirdManager {
         }
     }
 
+    public void AnimationOn() {
+        if (birdSprites == null) return;
+        if (birdSprites.size() == 0) return;
+
+        int size = birdSprites.size();
+        for (int i=0; i<size; i++) {
+            birdSprites.get(i).AnimationOn();
+        }
+    }
+
     public void setReadyPosition() {
         if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
             LineUpBirds(GameActivity.getCameraWidth() / 4);
@@ -219,15 +230,18 @@ public class BirdManager {
         }
     }
 
-    public boolean checkSelfBirdCollision(PipeManager pipeManager) {
-        if (pipeManager == null)
-            return false;
-
-        BirdSprite me = birdSprites.get(ReceiveDataStorage.getPlayerLabel());
-        boolean check = pipeManager.isCollided(me.getAnimatedSprite())
-                || me.outofLowerBound();
-        if (check) me.StopAnimation();
+    public boolean checkBirdCollision(PipeManager pipeManager, int label) {
+        if (pipeManager == null) return false;
+        if (label > ReceiveDataStorage.getPlayerNum()) return false;
+        BirdSprite birdSprite = birdSprites.get(label);
+        boolean check = pipeManager.isCollided(birdSprite.getAnimatedSprite())
+                || birdSprite.outofLowerBound();
+        if (check) birdSprite.StopAnimation();
         return check;
+    }
+
+    public boolean checkSelfBirdCollision(PipeManager pipeManager) {
+        return checkBirdCollision(pipeManager, ReceiveDataStorage.getPlayerLabel());
     }
 
     public boolean checkSelfBirdPassPipePair(PipeManager pipeManager) {

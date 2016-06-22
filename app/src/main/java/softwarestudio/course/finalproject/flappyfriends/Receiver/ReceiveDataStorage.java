@@ -8,6 +8,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Queue;
 
+import softwarestudio.course.finalproject.flappyfriends.Creature.Activation;
 import softwarestudio.course.finalproject.flappyfriends.Creature.Bird;
 import softwarestudio.course.finalproject.flappyfriends.Creature.Command;
 import softwarestudio.course.finalproject.flappyfriends.Creature.PipePair;
@@ -52,6 +53,8 @@ public class ReceiveDataStorage {
 
     private static int MYSCORE = 0;
 
+    private static List<Activation> activationList = new ArrayList<>();
+
     private static List<PipePair> pipePairs = new ArrayList<>();
 
     private static List<Bird> birds = new ArrayList<>();
@@ -72,8 +75,11 @@ public class ReceiveDataStorage {
         PLAYER_NUM = num;
     }
 
-    public static void setGameActivation(boolean isActive) {
-        GAME_ACTIVE = isActive;
+    public static void setGameActivation() {
+        GAME_ACTIVE = false;
+        for (int i=0; i<PLAYER_NUM; i++) {
+            GAME_ACTIVE |= activationList.get(i).getActivaion();
+        }
     }
 
     public static void setConnection(boolean connection) {
@@ -85,6 +91,31 @@ public class ReceiveDataStorage {
             return;
         GAME_STATE = gameState;
     }
+
+    public static void setActivityList(int label, boolean activation) {
+        if (label >= PLAYER_NUM) return;
+        activationList.get(label).ReplaceData(activation);
+    }
+
+    public static void setMyActivation(boolean activation) {
+        activationList.get(PLAYER_LABEL).ReplaceData(activation);
+    }
+
+    public static void setupActivationList() {
+        if (activationList.size() == 0) {
+            for (int i=0; i<PLAYER_NUM; i++) {
+                activationList.add(new Activation());
+            }
+            setGameActivation();
+        }
+    }
+
+    public static void setAllActive() {
+        for (int i=0; i<PLAYER_NUM; i++)
+            activationList.get(i).ReplaceData(true);
+        setGameActivation();
+    }
+
 
     public static void MyscoreIncremnet() {
         if (MYSCORE <= Utility.MAX_SCORE)

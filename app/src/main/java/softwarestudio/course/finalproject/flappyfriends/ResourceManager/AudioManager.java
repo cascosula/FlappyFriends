@@ -33,6 +33,8 @@ public class AudioManager {
 
     private Music backgroundMusic;
 
+    private boolean playgameover = true;
+
     public AudioManager(SimpleBaseGameActivity context)
         throws NullPointerException{
         if (context == null)
@@ -57,11 +59,16 @@ public class AudioManager {
                 scoreup.play();
                 break;
             case AUDIOLABEL_GAMEOVER:
-                gameover.play();
+                if (playgameover) {
+                    gameover.play();
+                    playgameover = false;
+                }
                 break;
             default: break;
         }
     }
+
+    public void resetGameOverOnePlayFlag() { playgameover = true; }
 
     public void pauseAudio(int label) {
         if (label >= AUDIOLABEL_NULL)

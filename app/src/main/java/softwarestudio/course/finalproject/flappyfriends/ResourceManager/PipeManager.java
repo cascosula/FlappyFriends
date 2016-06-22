@@ -166,7 +166,7 @@ public class PipeManager {
         if (pipenum <= 0)
             throw new IllegalArgumentException("Illegal Player Number");
 
-        pairPipeSprites = new ArrayList<PipePairSprite>();
+        pairPipeSprites = new ArrayList<>();
 
         for (int i=0; i<pipenum; i++) {
             Log.d(LOG_TAG, (i+1) + "th pipe pair building");

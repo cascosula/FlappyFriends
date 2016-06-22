@@ -157,7 +157,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                         ReceiveDataStorage.setPlayerLabel((info.isGroupOwner)? 0:1);
                         ReceiveDataStorage.setPlayerNum(ipsNum);
                         ReceiveDataStorage.setConnection(true);
-                        ReceiveDataStorage.setGameActivation(false);
+                        //ReceiveDataStorage.setGameActivation;
                         ReceiveDataStorage.setGameState(
                                 softwarestudio.course.finalproject.flappyfriends.Utility.GAMESTATE_ONIDLE);
 
@@ -201,7 +201,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         ReceiveDataStorage.setPlayerLabel((info.isGroupOwner)? 0:1);
         ReceiveDataStorage.setPlayerNum(ipsNum);
         ReceiveDataStorage.setConnection(true);
-        ReceiveDataStorage.setGameActivation(false);
+        //ReceiveDataStorage.setGameActivation(false);
         ReceiveDataStorage.setGameState(softwarestudio.course.finalproject.flappyfriends.Utility.GAMESTATE_ONIDLE);
 
         Intent intent = new Intent(getActivity(), GameActivity.class);

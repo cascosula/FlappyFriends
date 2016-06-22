@@ -57,6 +57,7 @@ public class GameActivity extends SimpleBaseGameActivity {
         CAMERA_HEIGHT = 800;
         CAMERA_WIDTH = Utility.calculateScreenWidth(this, CAMERA_HEIGHT);
 
+        ReceiveDataStorage.setupActivationList();
         mAudioManager = new AudioManager(this);
         mFontManager = new FontManager(this);
         mTextManager = new TextManager(this, mFontManager.getFont());
@@ -114,7 +115,7 @@ public class GameActivity extends SimpleBaseGameActivity {
                     switch (ReceiveDataStorage.getGameState()) {
                         case Utility.GAMESTATE_ONIDLE:
                             if (ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
-                                ReceiveDataStorage.setGameActivation(true);
+                                ReceiveDataStorage.setAllActive();
                                 ReceiveDataStorage.setGameState(Utility.GAMESTATE_ONPREPARE);
                             }
                             break;
@@ -181,6 +182,7 @@ public class GameActivity extends SimpleBaseGameActivity {
                 mTextManager.showBestScoreBoard();
                 mPipeManager.setReadyPosition();
                 mBirdManager.setAtVerticalMiddle();
+                mAudioManager.resetGameOverOnePlayFlag();
             }
 
             private void onPrepare() {
@@ -194,6 +196,8 @@ public class GameActivity extends SimpleBaseGameActivity {
             }
 
             private void onOperate() {
+                ReceiveDataStorage.setGameActivation();
+
                 mAudioManager.playAudio(AudioManager.AUDIOLABEL_BGM);
 
                 mTextManager.showCountingScoreBoard();
@@ -202,21 +206,34 @@ public class GameActivity extends SimpleBaseGameActivity {
 
                 mPipeManager.receiveCommand();
 
+                mBirdManager.AnimationOn();
                 mBirdManager.FetchCommand();
 
                 if (mBirdManager.checkSelfBirdPassPipePair(mPipeManager)) {
                     ReceiveDataStorage.MyscoreIncremnet();
                     mAudioManager.playAudio(AudioManager.AUDIOLABEL_SCOREUP);
                 }
-                if (mBirdManager.checkSelfBirdCollision(mPipeManager)) {
-                    ReceiveDataStorage.setGameActivation(false);
-                    mAudioManager.playAudio(AudioManager.AUDIOLABEL_GAMEOVER);
+                if (ReceiveDataStorage.getConnection()) {
+                    for (int i=0; i<ReceiveDataStorage.getPlayerNum(); i++) {
+                        if (mBirdManager.checkBirdCollision(mPipeManager,i)) {
+                            ReceiveDataStorage.setActivityList(i, false);
+                            if (i == ReceiveDataStorage.getPlayerLabel())
+                                mAudioManager.playAudio(AudioManager.AUDIOLABEL_GAMEOVER);
+                        }
+                    }
+                } else {
+                    if (mBirdManager.checkSelfBirdCollision(mPipeManager)) {
+                        ReceiveDataStorage.setMyActivation(false);
+                        mAudioManager.playAudio(AudioManager.AUDIOLABEL_GAMEOVER);
+                    }
                 }
-                if (!ReceiveDataStorage.getGameActivation()
-                        && ReceiveDataStorage.getPlayerLabel() == Utility.TARGET_HOST) {
+
+                if (ReceiveDataStorage.getConnection()) {
+                    // transfer data
+                }
+                if (!ReceiveDataStorage.getGameActivation()) {
                     ReceiveDataStorage.setGameState(Utility.GAMESTATE_ONSTOP);
                     mTextManager.setFullScoreBoardReady();
-                    //mPipeManager.setReadyPosition();
                 }
             }
 
