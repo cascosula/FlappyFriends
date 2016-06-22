@@ -11,6 +11,7 @@ import java.util.List;
 import softwarestudio.course.finalproject.flappyfriends.Creature.Bird;
 import softwarestudio.course.finalproject.flappyfriends.Creature.Command;
 import softwarestudio.course.finalproject.flappyfriends.GameActivity;
+import softwarestudio.course.finalproject.flappyfriends.R;
 import softwarestudio.course.finalproject.flappyfriends.Receiver.ReceiveDataStorage;
 import softwarestudio.course.finalproject.flappyfriends.Utility;
 
@@ -117,7 +118,8 @@ public class BirdManager {
             return bird.outofLowerBound();
         }
 
-        //public Bird getBird() { return bird; }
+        public Bird getBird() { return bird; }
+
         public AnimatedSprite getAnimatedSprite() { return animatedSprite; }
     }
 
@@ -218,6 +220,7 @@ public class BirdManager {
         ReceiveDataStorage.addCommandToCommandQueue(
                 new Command(ReceiveDataStorage.getPlayerLabel())
         );
+        ExecuteCommands();
     }
 
     private void FetchBirdData(List<Bird> newdata) {
@@ -234,6 +237,15 @@ public class BirdManager {
             BirdSprite cur = birdSprites.get(i);
             cur.modifyBird(newdata.get(i));
         }
+    }
+
+    private void FeedBackBirdData() {
+        List<Bird> data = new ArrayList<>();
+        int size = birdSprites.size();
+        for (int i=0; i<size; i++) {
+            data.add(i, birdSprites.get(i).getBird());
+        }
+        ReceiveDataStorage.setBirdsData(data);
     }
 
     public void FetchCommand() {
@@ -254,6 +266,7 @@ public class BirdManager {
     }
 
     private void ExecuteCommands() {
+
         if (commands == null && commands.size() <= 0)
             return;
         int size = commands.size();
@@ -262,7 +275,17 @@ public class BirdManager {
             if (target < Utility.TARGET_NULL)
                 birdSprites.get(target).BirdJump();
         }
+
+        /*
+        if (birdSprites == null
+                && birdSprites.size() < ReceiveDataStorage.getPlayerLabel())
+            return;
+        birdSprites.get(
+                ReceiveDataStorage.getPlayerLabel()
+        ).BirdJump();
+        */
     }
+
 
     private void moveBirds() {
         int size = birdSprites.size();

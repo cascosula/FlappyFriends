@@ -127,12 +127,17 @@ public class GameActivity extends SimpleBaseGameActivity {
                             }
                             break;
                         case Utility.GAMESTATE_ONOPERATE:
+                            /*
                             if (ReceiveDataStorage.getGameActivation()) {
                                 mBirdManager.SendCommand();
                                 mAudioManager.playAudio(
                                         AudioManager.AUDIOLABEL_JUMP
                                 );
                             }
+                            */
+                            mBirdManager.SendCommand();
+                            mAudioManager.playAudio(
+                                    AudioManager.AUDIOLABEL_JUMP);
                             break;
                         case Utility.GAMESTATE_ONSTOP:
                             /*

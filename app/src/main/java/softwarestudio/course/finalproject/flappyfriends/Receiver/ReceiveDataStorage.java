@@ -171,6 +171,11 @@ public class ReceiveDataStorage {
         commandQueue.add(command);
     }
 
+    public static void addCommandToCommandList(Command command) {
+        if (command == null) return;
+        commands.add(command);
+    }
+
     /**
      * Input new command list
      * If the size of new data does not fetch to original list
@@ -179,6 +184,7 @@ public class ReceiveDataStorage {
      * Called only by game host in Reciever
      * @param newdata
      */
+    /*
     public static void setCommandsData(List<Command> newdata) {
         if (newdata == null) return;
         int originsize = commands.size();
@@ -201,6 +207,7 @@ public class ReceiveDataStorage {
             }
         }
     }
+    */
 
     /**
      * Write command in queue back to list
